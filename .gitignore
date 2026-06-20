@@ -1,0 +1,59 @@
+# ── Python ──────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# ── Secrets & Config ──────────────────────────────
+config.json
+*.env
+.env.local
+*.key
+
+# ── Runtime Data ──────────────────────────────────
+agentd.pid
+*.pid
+
+# ── Session & Memory Data ─────────────────────────
+workspace/.sessions/
+workspace/memory/daily/
+
+# ── WeChat Bot Data ───────────────────────────────
+.weixin-clawbot/
+
+# ── ML / Model Files ─────────────────────────────
+*.pt
+*.pth
+*.onnx
+*.weights
+checkpoints/
+
+# ── OS Files ─────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ── IDE / Editor ─────────────────────────────────
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# ── Claude AI ────────────────────────────────────
+.claude/sessions/
+.claude/transcripts/
+
+# ── Logs ─────────────────────────────────────────
+*.log
+logs/
+
+# ── Misc ─────────────────────────────────────────
+*.tmp
+*.bak

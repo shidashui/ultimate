@@ -1,0 +1,19 @@
+{
+  "change": "moss-rebirth",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "8004814060499a739b0a1886976f336ed52ce089156ca9f1f0656de28b33b8b9",
+  "files": [
+    { "path": "openspec/changes/moss-rebirth/proposal.md", "sha256": "aa97a46d750b59ea1612d99ffa1eb16920b1171b0f7052ae72a976cc876a591b" },
+    { "path": "openspec/changes/moss-rebirth/design.md", "sha256": "a42fbb38cf522398520259ea508eae4ac734c4cbd28a9b01a2e32fcbafd4886b" },
+    { "path": "openspec/changes/moss-rebirth/tasks.md", "sha256": "198c607b6ea8590a090ecef4d92eba241975aa6fb29d3ce17859cbc29aece316" },
+    { "path": "openspec/changes/moss-rebirth/specs/agent-identity/spec.md", "sha256": "e7e1a83a72a172c5473fcb00aba94745e650a842fc643cc575b546eeddb4879d" },
+    { "path": "openspec/changes/moss-rebirth/specs/agent-persona/spec.md", "sha256": "a074c9579a300b1fff4801373fc5d8e63002b7c6778d5ec914b625cb978b0c11" },
+    { "path": "openspec/changes/moss-rebirth/specs/agent-tools/spec.md", "sha256": "27827acb87ceaacf5fb85a33eb02726115c085ca942537875a726f7a3aec7cf0" },
+    { "path": "openspec/changes/moss-rebirth/specs/multi-agent/spec.md", "sha256": "42ff4a1b8e5607e8b9f965d333b48f150051a9473cc7713d6c75bfd812d572b4" },
+    { "path": "openspec/changes/moss-rebirth/specs/system-context/spec.md", "sha256": "114aa60083ba29848695a2e06d140d769a4986957a03007755aa3dcf40349434" },
+    { "path": "openspec/changes/moss-rebirth/specs/system-heartbeat/spec.md", "sha256": "6992ee56c9640f1eb000a5ce47f6748ccc21aef1580dec4d1a75e27cb8f9d959" }
+  ]
+}

@@ -1,0 +1,4 @@
+aiohttp>=3.8.0
+pycryptodome>=3.15.0
+qrcode>=7.0.0
+pillow>=9.0.0
