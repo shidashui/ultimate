@@ -2,6 +2,8 @@
 comet_change: hermes-agent-refactor
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-06-21-hermes-agent-refactor
+status: final
 ---
 
 # Hermes Agent Refactor — 技术设计

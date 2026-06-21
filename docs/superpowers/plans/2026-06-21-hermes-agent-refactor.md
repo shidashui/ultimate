@@ -2,6 +2,7 @@
 change: hermes-agent-refactor
 design-doc: docs/superpowers/specs/2026-06-21-hermes-agent-refactor-design.md
 base-ref: 5914fed16e00f4768bfc39ada2933c657c2e338d
+archived-with: 2026-06-21-hermes-agent-refactor
 ---
 
 # Hermes Agent Refactor — Implementation Plan
@@ -22,6 +23,7 @@ base-ref: 5914fed16e00f4768bfc39ada2933c657c2e338d
 - `TOOLS` / `TOOL_HANDLERS` module-level exports retained for backward compat
 - No new external dependencies
 
+archived-with: 2026-06-21-hermes-agent-refactor
 ---
 
 ### Task 1: IterationBudget
@@ -70,6 +72,7 @@ git add agentd/agent/budget.py config/configs.py
 git commit -m "feat: add IterationBudget and MAX_TOOL_ITERATIONS config"
 ```
 
+archived-with: 2026-06-21-hermes-agent-refactor
 ---
 
 ### Task 2: ToolRegistry — Declarative Tool Registration
@@ -166,6 +169,7 @@ git add agentd/tools/registry.py
 git commit -m "feat: add ToolRegistry — declarative tool registration"
 ```
 
+archived-with: 2026-06-21-hermes-agent-refactor
 ---
 
 ### Task 3: Migrate Tools to Registry
@@ -417,6 +421,7 @@ git add agentd/tools/memory_tools.py agentd/tools/file_tools.py agentd/tools/bro
 git commit -m "refactor: migrate all tools to declarative ToolRegistry"
 ```
 
+archived-with: 2026-06-21-hermes-agent-refactor
 ---
 
 ### Task 4: ContextGuard — Preflight Compression
@@ -473,6 +478,7 @@ git add agentd/context/context.py
 git commit -m "feat: add preflight compression to ContextGuard, reduce retries"
 ```
 
+archived-with: 2026-06-21-hermes-agent-refactor
 ---
 
 ### Task 5: AgentRunner — Core Refactor
@@ -701,6 +707,7 @@ git add agentd/agent/runner.py agentd/prompt/prompts.py agentd/skill/skill.py
 git commit -m "refactor: unified async runner with prompt cache, budget, preflight"
 ```
 
+archived-with: 2026-06-21-hermes-agent-refactor
 ---
 
 ### Task 6: Entry Point Adaptation
@@ -773,6 +780,7 @@ git add cli/cli.py gateway/gateway.py
 git commit -m "refactor: adapt CLI/Gateway to unified async run_turn"
 ```
 
+archived-with: 2026-06-21-hermes-agent-refactor
 ---
 
 ### Task 7: Verification
