@@ -48,6 +48,8 @@ def _serialize_messages_for_summary(messages: list[dict]) -> str:
 class ContextGuard:
     """保护 agent 免受上下文窗口溢出。"""
 
+    PREFLIGHT_RATIO = 0.8  # 80% 阈值触发预飞压缩
+
     def __init__(self, max_tokens: int = CONTEXT_SAFE_LIMIT):
         self.max_tokens = max_tokens
 
@@ -82,6 +84,25 @@ class ContextGuard:
                                 json.dumps(block.input)
                             )
         return total
+
+    def preflight(self, system: str, messages: list[dict]) -> list[dict]:
+        """预飞检查：估算 token 总量，超阈值主动压缩后返回。
+
+        不超阈值时返回原 messages（零开销）。
+        压缩失败时返回原 messages（让反应式重试兜底）。
+        """
+        total = self.estimate_tokens(system) + self.estimate_messages_tokens(messages)
+        if total > self.max_tokens * self.PREFLIGHT_RATIO:
+            print_warn(
+                f"  [preflight] ~{total:,} tokens "
+                f"(>{self.PREFLIGHT_RATIO*100:.0f}% threshold), compacting..."
+            )
+            try:
+                return self.compact_history(messages)
+            except Exception as exc:
+                print_warn(f"  [preflight] compact failed: {exc}, skipping")
+                return messages
+        return messages
 
     def truncate_tool_result(self, result: str, max_fraction: float = 0.3) -> str:
         """在换行边界处只保留头部进行截断。"""
@@ -232,7 +253,7 @@ class ContextGuard:
         system: str,
         messages: list[dict],
         tools: list[dict] | None = None,
-        max_retries: int = 2,
+        max_retries: int = 1,
     ) -> Any:
         """
         三阶段重试:
@@ -287,7 +308,7 @@ class ContextGuard:
         system: str,
         messages: list[dict],
         tools: list[dict] | None = None,
-        max_retries: int = 2,
+        max_retries: int = 1,
     ):
         current_messages = messages
 
@@ -330,7 +351,7 @@ class ContextGuard:
         system: str,
         messages: list[dict],
         tools: list[dict] | None = None,
-        max_retries: int = 2,
+        max_retries: int = 1,
     ) -> Any:
         """
         guard_api_call 的异步版本。
