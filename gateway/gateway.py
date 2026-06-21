@@ -110,7 +110,7 @@ class Gateway:
         messages = self._user_messages[msg.user_id]
 
         async with self._get_user_lock(msg.user_id):
-            reply = await self.runner.async_run_turn(
+            reply = await self.runner.run_turn(
                 user_input=msg.content,
                 messages=messages,
                 store=store,

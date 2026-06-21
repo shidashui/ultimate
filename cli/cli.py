@@ -1,3 +1,4 @@
+import asyncio
 import json
 from utils.print_tools import *
 from config.configs import MAX_TOTAL_CHARS, MODEL, WORKSPACE_DIR
@@ -65,11 +66,13 @@ class Cli:
     def handle_user_input(self, user_input: str):
         if user_input.startswith("/") and self.handle_repl_command(user_input):
             return
-        reply = self.runner.run_turn(
-            user_input=user_input,
-            messages=self.messages,
-            store=self.store,
-            channel="terminal",
+        reply = asyncio.run(
+            self.runner.run_turn(
+                user_input=user_input,
+                messages=self.messages,
+                store=self.store,
+                channel="terminal",
+            )
         )
         if reply:
             print_assistant(reply)
@@ -184,7 +187,8 @@ class Cli:
             print_section("完整系统提示词")
             prompt = build_system_prompt(
                 mode="full", bootstrap=self.runner.bootstrap_data,
-                skill_registry=self.runner.skill_registry, memory_context=self.runner.memory_store._auto_recall("show prompt"),
+                skill_registry=self.runner.skill_registry,
+                channel="terminal",
             )
             if len(prompt) > 3000:
                 print(prompt[:3000] + "\n")
