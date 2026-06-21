@@ -85,37 +85,6 @@ class SkillsManager:
                 return s
         return None
 
-    def build_skill_invoke_tool(self) -> dict:
-        """生成 skill_invoke 工具 schema，description 含动态 skill 列表。"""
-        if self.skills:
-            entries = [f"- {s['name']}: {s['description']}" for s in self.skills]
-            registry_text = "\n".join(entries)
-        else:
-            registry_text = "(无可用技能)"
-
-        return {
-            "name": "skill_invoke",
-            "description": (
-                "加载一个已注册的技能模块，获取其完整操作指令。"
-                "加载后，你必须严格按照技能指令执行——技能定义的是操作流程，不是参考建议。"
-                "当前可用技能:\n" + registry_text
-            ),
-            "input_schema": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "description": "技能名称，必须是上述可用技能之一",
-                    },
-                    "args": {
-                        "type": "string",
-                        "description": "传递给技能的可选参数",
-                    },
-                },
-                "required": ["name"],
-            },
-        }
-
     def format_skill_registry(self) -> str:
         """生成轻量技能注册表（仅名称 + 描述），用于 system prompt 注入。"""
         if not self.skills:

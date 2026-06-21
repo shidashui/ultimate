@@ -59,16 +59,11 @@ def build_system_prompt(
             f"{skill_registry}"
         )
 
-    # 第 5 层: 记忆 -- 长期记忆 + 本轮自动搜索结果
+    # 第 5 层: 记忆 -- 长期记忆引用，自动召回内容注入 user message
     if mode == "full":
         mem_md = bootstrap.get("MEMORY.md", "").strip()
-        parts: list[str] = []
         if mem_md:
-            parts.append(f"### Evergreen Memory\n\n{mem_md}")
-        if memory_context:
-            parts.append(f"### Recalled Memories (auto-searched)\n\n{memory_context}")
-        if parts:
-            sections.append("## Memory\n\n" + "\n\n".join(parts))
+            sections.append(f"## Memory\n\n### Evergreen Memory\n\n{mem_md}")
         sections.append(
             "## Memory Instructions\n\n"
             "- Use memory_write to save important user facts and preferences.\n"
@@ -83,12 +78,11 @@ def build_system_prompt(
             if content:
                 sections.append(f"## {name.replace('.md', '')}\n\n{content}")
 
-    # 第 7 层: 运行时上下文
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    # 第 7 层: 运行时上下文（时间戳移入 user message 每轮动态注入）
     sections.append(
         f"## Runtime Context\n\n"
         f"- Agent ID: {agent_id}\n- Model: {MODEL['name']}\n"
-        f"- Channel: {channel}\n- Current time: {now}\n- Prompt mode: {mode}"
+        f"- Channel: {channel}\n- Prompt mode: {mode}"
     )
 
     # 第 8 层: 渠道提示
