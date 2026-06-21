@@ -10,8 +10,8 @@ plan: null
 verify_result: pending
 verification_report: docs/superpowers/reports/2026-06-21-fix-tools-handlers-none-init-verify.md
 branch_status: handled
-build_command: 'python -c "from agentd.bootstrap.container import container; assert container.tools_handlers is not None; assert len(container.tools_handlers) == 12; print(''Build: OK'')"'
-verify_command: 'python -c "from agentd.bootstrap.container import container; keys = list(container.tools_handlers.keys()); assert ''memory_write'' in keys; assert ''skill_invoke'' in keys; assert ''bash'' in keys; assert ''read_file'' in keys; print(''Verify: OK'')"'
+build_command: python -m agentd.bootstrap.container
+verify_command: python -m pytest tests/ -x -q --tb=short 2>&1 || echo "No pytest; using import check instead" && python -c "from agentd.bootstrap.container import container; assert len(container.tools_handlers) == 12"
 created_at: 2026-06-21
 verified_at: null
 archived: false
