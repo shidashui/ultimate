@@ -4,7 +4,7 @@ from agentd.skill.skill import SkillsManager
 from agentd.memory.memory import MemoryStore
 from agentd.context.session import SessionStore
 from agentd.context.context import ContextGuard
-from agentd.tools.tool_handlers import TOOLS, TOOL_HANDLERS
+from agentd.tools.tool_handlers import get_tools, get_tool_handlers
 
 class Container:
     def __init__(self):
@@ -33,8 +33,8 @@ class Container:
         self.register("memory_store", memory_store)
         self.register("guard", guard)
 
-        self.tools = TOOLS
-        self.tools_handlers = TOOL_HANDLERS
+        self.tools = get_tools()
+        self.tools_handlers = get_tool_handlers()
 
 # ✅ 全局唯一实例（但不是全局变量乱飞）
 container = Container()
