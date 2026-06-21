@@ -197,137 +197,84 @@ def tool_edit_file(file_path: str, old_string: str, new_string: str) -> str:
 #   两者通过 name 字段关联. 就这么简单.
 # ---------------------------------------------------------------------------
 
-TOOLS = [
-    {
-        "name": "bash",
-        "description": (
-            "Run a shell command and return its output. "
-            "Use for system commands, git, package managers, etc. "
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "command": {
-                    "type": "string",
-                    "description": "The shell command to execute.",
-                },
-                "timeout": {
-                    "type": "integer",
-                    "description": "Timeout in seconds. Default 30.",
-                },
-            },
-            "required": ["command"],
-        },
-    },
-    {
-        "name": "cmd",
-        "description": (
-            "Run a Windows CMD command and return its output. "
-            "Specifically optimized for Windows command prompt. "
-            "Only available on Windows systems."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "command": {
-                    "type": "string",
-                    "description": "The Windows CMD command to execute.",
-                },
-                "timeout": {
-                    "type": "integer",
-                    "description": "Timeout in seconds. Default 30.",
-                },
-            },
-            "required": ["command"],
-        },
-    },
-    {
-        "name": "read_file",
-        "description": "Read the contents of a file under the workspace directory.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "file_path": {
-                    "type": "string",
-                    "description": "Path relative to workspace directory.",
-                },
-            },
-            "required": ["file_path"],
-        },
-    },
-    {
-        "name": "list_directory",
-        "description": "List files and subdirectories in a directory under workspace.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "directory": {
-                    "type": "string",
-                    "description": "Path relative to workspace directory. Default is root.",
-                },
-            },
-            "required": [],
-        },
-    },
-    {
-        "name": "get_current_time",
-        "description": "Get the current date and time in UTC.",
-        "input_schema": {
-            "type": "object",
-            "properties": {},
-            "required": [],
-        },
-    },
-    {
-        "name": "write_file",
-        "description": (
-            "Write content to a file. Creates parent directories if needed. "
-            "Overwrites existing content."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "file_path": {
-                    "type": "string",
-                    "description": "Path to the file (relative to working directory).",
-                },
-                "content": {
-                    "type": "string",
-                    "description": "The content to write.",
-                },
-            },
-            "required": ["file_path", "content"],
-        },
-    },
-    {
-        "name": "edit_file",
-        "description": (
-            "Replace an exact string in a file with a new string. "
-            "The old_string must appear exactly once in the file. "
-            "Always read the file first to get the exact text to replace."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "file_path": {
-                    "type": "string",
-                    "description": "Path to the file (relative to working directory).",
-                },
-                "old_string": {
-                    "type": "string",
-                    "description": "The exact text to find and replace. Must be unique.",
-                },
-                "new_string": {
-                    "type": "string",
-                    "description": "The replacement text.",
-                },
-            },
-            "required": ["file_path", "old_string", "new_string"],
-        },
-    },
-]
+from agentd.tools.registry import registry
 
-# 调度表: 工具名 -> 处理函数
+registry.register(
+    name="bash",
+    description="Run a shell command and return its output. Use for system commands, git, package managers, etc.",
+    parameters={
+        "command": {"type": "string", "description": "The shell command to execute."},
+        "timeout": {"type": "integer", "description": "Timeout in seconds. Default 30."},
+    },
+    handler=tool_bash,
+    toolset="general",
+)
+
+registry.register(
+    name="cmd",
+    description="Run a Windows CMD command and return its output. Only available on Windows systems.",
+    parameters={
+        "command": {"type": "string", "description": "The Windows CMD command to execute."},
+        "timeout": {"type": "integer", "description": "Timeout in seconds. Default 30."},
+    },
+    handler=tool_cmd,
+    toolset="general",
+)
+
+registry.register(
+    name="read_file",
+    description="Read the contents of a file under the workspace directory.",
+    parameters={
+        "file_path": {"type": "string", "description": "Path relative to workspace directory."},
+    },
+    handler=tool_read_file,
+    toolset="file",
+)
+
+registry.register(
+    name="list_directory",
+    description="List files and subdirectories in a directory under workspace.",
+    parameters={
+        "directory": {"type": "string", "description": "Path relative to workspace directory. Default is root."},
+    },
+    handler=tool_list_directory,
+    toolset="file",
+)
+
+registry.register(
+    name="get_current_time",
+    description="Get the current date and time in UTC.",
+    parameters={},
+    handler=tool_get_current_time,
+    toolset="general",
+)
+
+registry.register(
+    name="write_file",
+    description="Write content to a file. Creates parent directories if needed. Overwrites existing content.",
+    parameters={
+        "file_path": {"type": "string", "description": "Path to the file (relative to working directory)."},
+        "content": {"type": "string", "description": "The content to write."},
+    },
+    handler=tool_write_file,
+    toolset="file",
+)
+
+registry.register(
+    name="edit_file",
+    description="Replace an exact string in a file with a new string. The old_string must appear exactly once in the file.",
+    parameters={
+        "file_path": {"type": "string", "description": "Path to the file (relative to working directory)."},
+        "old_string": {"type": "string", "description": "The exact text to find and replace. Must be unique."},
+        "new_string": {"type": "string", "description": "The replacement text."},
+    },
+    handler=tool_edit_file,
+    toolset="file",
+)
+
+# 向后兼容的模块级导出
+_file_tool_names = {"bash", "cmd", "read_file", "list_directory", "get_current_time", "write_file", "edit_file"}
+TOOLS = [t for t in registry.get_tools() if t["name"] in _file_tool_names]
 TOOL_HANDLERS: dict[str, Any] = {
     "bash": tool_bash,
     "cmd": tool_cmd,

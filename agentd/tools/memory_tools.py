@@ -35,36 +35,35 @@ def tool_memory_search(query: str, top_k: int = 5) -> str:
 # (bash, read_file, write_file, edit_file) 的补充 -- 而非替代.
 # 完整的 agent 会将两组工具合并为一个列表传递给 LLM.
 
-TOOLS = [
-    {
-        "name": "memory_write",
-        "description": (
-            "Save an important fact or observation to long-term memory. "
-            "Use when you learn something worth remembering about the user or context."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "content": {"type": "string", "description": "The fact or observation to remember."},
-                "category": {"type": "string", "description": "Category: preference, fact, context, etc."},
-            },
-            "required": ["content"],
-        },
-    },
-    {
-        "name": "memory_search",
-        "description": "Search stored memories for relevant information, ranked by similarity.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "query": {"type": "string", "description": "Search query."},
-                "top_k": {"type": "integer", "description": "Max results. Default: 5."},
-            },
-            "required": ["query"],
-        },
-    },
-]
+from agentd.tools.registry import registry
 
+registry.register(
+    name="memory_write",
+    description=(
+        "Save an important fact or observation to long-term memory. "
+        "Use when you learn something worth remembering about the user or context."
+    ),
+    parameters={
+        "content": {"type": "string", "description": "The fact or observation to remember."},
+        "category": {"type": "string", "description": "Category: preference, fact, context, etc."},
+    },
+    handler=tool_memory_write,
+    toolset="memory",
+)
+
+registry.register(
+    name="memory_search",
+    description="Search stored memories for relevant information, ranked by similarity.",
+    parameters={
+        "query": {"type": "string", "description": "Search query."},
+        "top_k": {"type": "integer", "description": "Max results. Default: 5."},
+    },
+    handler=tool_memory_search,
+    toolset="memory",
+)
+
+# 向后兼容的模块级导出
+TOOLS = [t for t in registry.get_tools() if t["name"] in ("memory_write", "memory_search")]
 TOOL_HANDLERS: dict[str, Any] = {
     "memory_write": tool_memory_write,
     "memory_search": tool_memory_search,

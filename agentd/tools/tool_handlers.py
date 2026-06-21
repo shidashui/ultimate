@@ -1,20 +1,22 @@
+"""工具汇总入口 — import 触发各工具模块自注册到 ToolRegistry。"""
+
+# 导入即注册（利用 Python 模块加载副作用）
+from agentd.tools import memory_tools   # noqa: F401
+from agentd.tools import file_tools     # noqa: F401
+from agentd.tools import browser_tools  # noqa: F401
+from agentd.tools import skill_tools    # noqa: F401
+
+from agentd.tools.registry import registry
 
 
 def get_tools():
-    from agentd.tools.memory_tools import TOOLS as MEMORY_TOOLS
-    from agentd.tools.file_tools import TOOLS as FILE_TOOLS
-    from agentd.tools.browser_tools import TOOLS as BROWSER_TOOLS
-    from agentd.tools.skill_tools import TOOLS as SKILL_TOOLS
+    return registry.get_tools()
 
-    return MEMORY_TOOLS + FILE_TOOLS + BROWSER_TOOLS + SKILL_TOOLS
 
 def get_tool_handlers():
-    from agentd.tools.memory_tools import TOOL_HANDLERS as MEMORY_TOOL_HANDLERS
-    from agentd.tools.file_tools import TOOL_HANDLERS as FILE_TOOL_HANDLERS
-    from agentd.tools.browser_tools import TOOL_HANDLERS as BROWSER_TOOL_HANDLERS
-    from agentd.tools.skill_tools import TOOL_HANDLERS as SKILL_TOOL_HANDLERS
+    return registry.get_handlers()
 
-    return {**MEMORY_TOOL_HANDLERS, **FILE_TOOL_HANDLERS, **BROWSER_TOOL_HANDLERS, **SKILL_TOOL_HANDLERS}
 
+# 向后兼容的模块级变量
 TOOLS = get_tools()
 TOOL_HANDLERS = get_tool_handlers()

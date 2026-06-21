@@ -100,47 +100,32 @@ def get_webpage(url: str) -> str:
         # raise RuntimeError(f"访问网页失败: {e}")
         return f"访问网页失败: {e}"
 
-TOOLS = [
-    {
-        "name": "web_search",
-        "description": (
-            "Search the web and return results. "
-            "Use for looking up information, news, etc. "
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "query": {
-                    "type": "string",
-                    "description": "The search query.",
-                },
-                "num_results": {
-                    "type": "integer",
-                    "description": "Number of results to return. Default 10.",
-                },
-            },
-            "required": ["query"],
-        },
-    },
-    {
-        "name": "get_webpage",
-        "description": (
-            "Fetch the content of a webpage given its URL. "
-            "Use for retrieving information from specific pages."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "url": {
-                    "type": "string",
-                    "description": "The URL of the webpage to fetch.",
-                },
-            },
-            "required": ["url"],
-        },
-    },
-]
+from agentd.tools.registry import registry
 
+registry.register(
+    name="web_search",
+    description="Search the web and return results. Use for looking up information, news, etc.",
+    parameters={
+        "query": {"type": "string", "description": "The search query."},
+        "num_results": {"type": "integer", "description": "Number of results to return. Default 10."},
+    },
+    handler=search,
+    toolset="browser",
+)
+
+registry.register(
+    name="get_webpage",
+    description="Fetch the content of a webpage given its URL. Use for retrieving information from specific pages.",
+    parameters={
+        "url": {"type": "string", "description": "The URL of the webpage to fetch."},
+    },
+    handler=get_webpage,
+    toolset="browser",
+)
+
+# 向后兼容
+_browser_tool_names = {"web_search", "get_webpage"}
+TOOLS = [t for t in registry.get_tools() if t["name"] in _browser_tool_names]
 TOOL_HANDLERS = {
     "web_search": search,
     "get_webpage": get_webpage,
