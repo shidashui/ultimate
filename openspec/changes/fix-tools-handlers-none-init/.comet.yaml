@@ -1,5 +1,5 @@
 workflow: hotfix
-phase: verify
+phase: archive
 build_mode: direct
 build_pause: null
 isolation: branch
@@ -7,11 +7,11 @@ verify_mode: light
 base_ref: 6ba6cdef31949c4fadfbde200cd01c9e34a3ec79
 design_doc: null
 plan: null
-verify_result: pending
+verify_result: pass
 verification_report: docs/superpowers/reports/2026-06-21-fix-tools-handlers-none-init-verify.md
 branch_status: handled
 build_command: python -m agentd.bootstrap.container
 verify_command: python -m pytest tests/ -x -q --tb=short 2>&1 || echo "No pytest; using import check instead" && python -c "from agentd.bootstrap.container import container; assert len(container.tools_handlers) == 12"
 created_at: 2026-06-21
-verified_at: null
+verified_at: 2026-06-21
 archived: false
