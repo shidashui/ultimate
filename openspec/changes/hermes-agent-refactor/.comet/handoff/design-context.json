@@ -1,0 +1,17 @@
+{
+  "change": "hermes-agent-refactor",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "90bde2434c066db615af24821415a2e893a1d9cf932ccfa2a4417c9f2cf0957e",
+  "files": [
+    { "path": "openspec/changes/hermes-agent-refactor/proposal.md", "sha256": "17ef12b925cc56212270f9b74dbc0d2ee546331a7859b482f9e8889738ed7f12" },
+    { "path": "openspec/changes/hermes-agent-refactor/design.md", "sha256": "6863b1938a66a25d0da8100c0b16401d81a4d1798da1f41a82a155c107aa4a45" },
+    { "path": "openspec/changes/hermes-agent-refactor/tasks.md", "sha256": "ebe319e363a9f8de780d99b79eafaf930ffd1a4423a8cd5240e2ee6a79920280" },
+    { "path": "openspec/changes/hermes-agent-refactor/specs/agent-tools/spec.md", "sha256": "a53ad336139f778f8e19b81f4a3e3af66f9a997f761e9165b42f59f34dbb010e" },
+    { "path": "openspec/changes/hermes-agent-refactor/specs/prompt-caching/spec.md", "sha256": "72da5e79332cd1c34315222985d1e8adefd17bd6392f9180e708110f67cbc4ff" },
+    { "path": "openspec/changes/hermes-agent-refactor/specs/skill-scheduling/spec.md", "sha256": "bfcf1f0e8ae4c77495b1a13c75dac9f6aeda8fc0bb02989fd23c54ad2c5fb053" },
+    { "path": "openspec/changes/hermes-agent-refactor/specs/system-context/spec.md", "sha256": "10ce558575a6ea9506d33f340a3d28934593ec48fb7a763a799743f848c858bb" }
+  ]
+}
