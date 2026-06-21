@@ -1,5 +1,5 @@
 workflow: full
-phase: build
+phase: archive
 build_pause: null
 isolation: worktree
 build_mode: executing-plans
@@ -7,11 +7,11 @@ verify_mode: null
 base_ref: 5914fed16e00f4768bfc39ada2933c657c2e338d
 design_doc: docs/superpowers/specs/2026-06-21-hermes-agent-refactor-design.md
 plan: docs/superpowers/plans/2026-06-21-hermes-agent-refactor.md
-verify_result: pending
+verify_result: pass
 verification_report: docs/superpowers/reports/2026-06-21-hermes-agent-refactor-verify.md
 branch_status: handled
 created_at: 2026-06-21
-verified_at: null
+verified_at: 2026-06-21
 archived: false
 build_command: python -c "from agentd.tools.tool_handlers import _init; _init(); from agentd.agent.budget import IterationBudget; from agentd.agent.runner import AgentRunner; print('Build: all modules imported successfully')"
 verify_command: python -c "from agentd.tools.tool_handlers import _init; _init(); from agentd.tools.registry import registry; assert len(registry.get_tools()) == 12, f'Expected 12 tools, got {len(registry.get_tools())}'; from agentd.agent.budget import IterationBudget; b = IterationBudget(3); assert b.remaining == 3; print('Verify: all checks passed')"
