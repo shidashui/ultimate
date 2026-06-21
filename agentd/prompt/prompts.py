@@ -19,7 +19,7 @@ SYSTEM_PROMPT = (
 def build_system_prompt(
     mode: str = "full",
     bootstrap: dict[str, str] | None = None,
-    skills_block: str = "",
+    skill_registry: str = "",
     memory_context: str = "",
     agent_id: str = "main",
     channel: str = "terminal",
@@ -32,6 +32,14 @@ def build_system_prompt(
     identity = bootstrap.get("IDENTITY.md", "").strip()
     sections.append(identity if identity else "You are a helpful personal AI assistant.")
 
+    # 第 1.5 层: Skill 执行协议 -- 元指令
+    sections.append(
+        "## Skill Execution Protocol\n\n"
+        "When a skill is loaded via skill_invoke, its instructions are "
+        "authoritative. You MUST follow the skill's defined process exactly. "
+        "Skill instructions override conflicting default behaviors."
+    )
+
     # 第 2 层: 灵魂 -- 人格注入, 越靠前影响力越强
     if mode == "full":
         soul = bootstrap.get("SOUL.md", "").strip()
@@ -43,9 +51,13 @@ def build_system_prompt(
     if tools_md:
         sections.append(f"## Tool Usage Guidelines\n\n{tools_md}")
 
-    # 第 4 层: 技能
-    if mode == "full" and skills_block:
-        sections.append(skills_block)
+    # 第 4 层: 技能注册表 -- 名称 + 描述，完整正文通过 skill_invoke 按需加载
+    if mode == "full" and skill_registry:
+        sections.append(
+            "## Available Skills\n\n"
+            "向模型声明可用的技能模块。每个技能可通过 `skill_invoke` 工具按需加载。\n\n"
+            f"{skill_registry}"
+        )
 
     # 第 5 层: 记忆 -- 长期记忆 + 本轮自动搜索结果
     if mode == "full":

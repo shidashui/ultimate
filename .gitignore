@@ -49,6 +49,7 @@ Thumbs.db
 # ── Claude AI ────────────────────────────────────
 .claude/sessions/
 .claude/transcripts/
+.claude/
 
 # ── Logs ─────────────────────────────────────────
 *.log

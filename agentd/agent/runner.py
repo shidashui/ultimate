@@ -26,7 +26,7 @@ class AgentRunner:
         self.memory_store: MemoryStore  = _container.get("memory_store")
         self.bootstrap_data: dict       = _container.get("bootstrap_data")
         self.skills_mgr: SkillsManager  = _container.get("skills_mgr")
-        self.skills_block: str          = self.skills_mgr.format_prompt_block()
+        self.skill_registry: str        = self.skills_mgr.format_skill_registry()
         
     # ── 工具调用 ──────────────────────────────────
     def process_tool_call(self, tool_name: str, tool_input: dict) -> str:
@@ -86,7 +86,7 @@ class AgentRunner:
         system_prompt = build_system_prompt(
             mode="full",
             bootstrap=self.bootstrap_data,
-            skills_block=self.skills_block,
+            skill_registry=self.skill_registry,
             memory_context=memory_context,
             channel=channel,
         )
@@ -96,10 +96,14 @@ class AgentRunner:
 
         while True:
             try:
+                # 动态组装 tools: 静态工具 + 动态 skill_invoke schema
+                static_tools = [t for t in self.container.tools if t["name"] != "skill_invoke"]
+                dynamic_tools = static_tools + [self.skills_mgr.build_skill_invoke_tool()]
+
                 response = self.guard.guard_api_call(
                     system=system_prompt,
                     messages=messages,
-                    tools=self.container.tools,
+                    tools=dynamic_tools,
                 )
             except Exception as exc:
                 logger.exception("[Runner] LLM 调用异常: %s", exc)
@@ -147,7 +151,7 @@ class AgentRunner:
         system_prompt = build_system_prompt(
             mode="full",
             bootstrap=self.bootstrap_data,
-            skills_block=self.skills_block,
+            skill_registry=self.skill_registry,
             memory_context=memory_context,
             channel=channel,
         )
@@ -157,10 +161,14 @@ class AgentRunner:
 
         while True:
             try:
+                # 动态组装 tools: 静态工具 + 动态 skill_invoke schema
+                static_tools = [t for t in self.container.tools if t["name"] != "skill_invoke"]
+                dynamic_tools = static_tools + [self.skills_mgr.build_skill_invoke_tool()]
+
                 response = await self.guard.async_guard_api_call(
                     system=system_prompt,
                     messages=messages,
-                    tools=self.container.tools,
+                    tools=dynamic_tools,
                 )
             except Exception as exc:
                 logger.exception("[Runner] LLM 调用异常: %s", exc)

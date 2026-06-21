@@ -184,7 +184,7 @@ class Cli:
             print_section("完整系统提示词")
             prompt = build_system_prompt(
                 mode="full", bootstrap=self.runner.bootstrap_data,
-                skills_block=self.runner.skills_block, memory_context=self.runner.memory_store._auto_recall("show prompt"),
+                skill_registry=self.runner.skill_registry, memory_context=self.runner.memory_store._auto_recall("show prompt"),
             )
             if len(prompt) > 3000:
                 print(prompt[:3000] + "\n")

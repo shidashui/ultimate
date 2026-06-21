@@ -1,0 +1,15 @@
+{
+  "change": "dynamic-skill-scheduling",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "89123cb227ad111394f9463146273711cf102302face7b9bdd2db05d2b964683",
+  "files": [
+    { "path": "openspec/changes/dynamic-skill-scheduling/proposal.md", "sha256": "2063d0d83ba77444144bac4a9f5f7ceec5f04635f766a6c607bab8814317b970" },
+    { "path": "openspec/changes/dynamic-skill-scheduling/design.md", "sha256": "5c85df6385781de8f5ef07eb2c9c555ae53a92588b32e29454b83da2732ae5af" },
+    { "path": "openspec/changes/dynamic-skill-scheduling/tasks.md", "sha256": "6d92e77c84097212d481108621a7a403a434991ed282db832f59bfa85366bdac" },
+    { "path": "openspec/changes/dynamic-skill-scheduling/specs/agent-tools/spec.md", "sha256": "bc7e301ff7d0cc559e1d67d0e8434c759c609078d45939ae76f9ac63433a8462" },
+    { "path": "openspec/changes/dynamic-skill-scheduling/specs/skill-scheduling/spec.md", "sha256": "7c51d05472ecdeb39562e40d0f76513cfa4635385e86ff49a982d175bf12909c" }
+  ]
+}
