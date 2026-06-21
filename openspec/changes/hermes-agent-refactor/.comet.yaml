@@ -13,5 +13,7 @@ branch_status: pending
 created_at: 2026-06-21
 verified_at: null
 archived: false
+build_command: python -c "from agentd.tools.tool_handlers import _init; _init(); from agentd.agent.budget import IterationBudget; from agentd.agent.runner import AgentRunner; print('Build: all modules imported successfully')"
+verify_command: python -c "from agentd.tools.tool_handlers import _init; _init(); from agentd.tools.registry import registry; assert len(registry.get_tools()) == 12, f'Expected 12 tools, got {len(registry.get_tools())}'; from agentd.agent.budget import IterationBudget; b = IterationBudget(3); assert b.remaining == 3; print('Verify: all checks passed')"
 handoff_context: openspec/changes/hermes-agent-refactor/.comet/handoff/design-context.json
 handoff_hash: 90bde2434c066db615af24821415a2e893a1d9cf932ccfa2a4417c9f2cf0957e
