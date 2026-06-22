@@ -1,0 +1,13 @@
+{
+  "change": "cli-skill-routing",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "a51d3aeed7d6d203cbf0f19eb243d0e19c4e20774cbaf2e12d3c72627b4c770e",
+  "files": [
+    { "path": "openspec/changes/cli-skill-routing/proposal.md", "sha256": "9c7436e12a83334f5bca62277c8cf91817a5a822060ce656f366a20f5fedc6f7" },
+    { "path": "openspec/changes/cli-skill-routing/design.md", "sha256": "aa25a9fbc3cc8e632b2b648a81b8d82e88e016730ea8ef5c3a02c23b7d98ca18" },
+    { "path": "openspec/changes/cli-skill-routing/tasks.md", "sha256": "49c07b71bc23ce36520dc6d86efe902d8d46a00b105424c01df4d1119ea525a4" }
+  ]
+}
