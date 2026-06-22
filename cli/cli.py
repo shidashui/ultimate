@@ -40,18 +40,24 @@ class Cli:
             self.messages = []
             print_session(f"  创建新会话: {sid}")
 
-        print_info("=" * 60)
-        print_info("  ultimate agent 启动成功！ ")
-        print_info(f"  当前模型: {MODEL['name']}")
-        print_info(f"  会话ID: {self.store.current_session_id}")
-        print_info(f"  当前工具列表: {', '.join(self.runner.container.tools_handlers.keys())}")
-        print_info(f"  工作区: {WORKSPACE_DIR}")
-        print_info(f"  已加载文件: {len(self.runner.bootstrap_data)}")
-        print_info(f"  已发现技能: {len(self.runner.skills_mgr.skills)}")
         stats = self.runner.memory_store.get_stats()
-        print_info(f"  记忆: 长期 {stats['evergreen_chars']}字符, {stats['daily_files']} 个每日文件")
-        print_info("  输入/help获取指令帮助, 输入/quit或者/exit退出。")
-        print_info("=" * 60)
+        info_lines = [
+            f"[primary]当前模型:[/primary] {MODEL['name']}",
+            f"[primary]会话ID:[/primary] {self.store.current_session_id}",
+            f"[primary]工具列表:[/primary] {', '.join(self.runner.container.tools_handlers.keys())}",
+            f"[primary]工作区:[/primary] {WORKSPACE_DIR}",
+            f"[primary]已加载文件:[/primary] {len(self.runner.bootstrap_data)}",
+            f"[primary]已发现技能:[/primary] {len(self.runner.skills_mgr.skills)}",
+            f"[primary]记忆:[/primary] 长期 {stats['evergreen_chars']}字符, {stats['daily_files']} 个每日文件",
+        ]
+        console.print()
+        console.print(Panel(
+            "\n".join(info_lines),
+            title="ultimate agent 启动成功！",
+            title_align="center",
+            border_style="primary",
+        ))
+        console.print("[muted]  /help 获取指令帮助, /quit 或 /exit 退出[/muted]")
         print()
 
         print_assistant(f"你好{user_name}！我是你的智能助理。有什么我可以帮你的吗？")
@@ -110,16 +116,21 @@ class Cli:
         elif cmd == "/list":
             sessions = self.store.list_sessions()
             if not sessions:
-                print_info("  No sessions found.")
+                console.print("[muted]  No sessions found.[/muted]")
                 return True
-            print_info("  Sessions:")
+            list_table = Table(title="会话列表", border_style="muted")
+            list_table.add_column("ID", style="info", no_wrap=True)
+            list_table.add_column("标签")
+            list_table.add_column("消息数")
+            list_table.add_column("最后活跃")
+            list_table.add_column("", no_wrap=True)
             for sid, meta in sessions:
-                active = " <-- current" if sid == self.store.current_session_id else ""
+                active = "<--" if sid == self.store.current_session_id else ""
                 label = meta.get("label", "")
-                label_str = f" ({label})" if label else ""
-                count = meta.get("message_count", 0)
+                count = str(meta.get("message_count", 0))
                 last = meta.get("last_active", "?")[:19]
-                print_info(f"    {sid}{label_str}  msgs={count}  last={last}{active}")
+                list_table.add_row(sid, label, count, last, active)
+            console.print(list_table)
             return True
 
         elif cmd == "/switch":
@@ -145,9 +156,9 @@ class Cli:
             bar_len = 30
             filled = int(bar_len * min(pct, 100) / 100)
             bar = "#" * filled + "-" * (bar_len - filled)
-            print_info(f"  Context usage: ~{estimated:,} / {self.runner.guard.max_tokens:,} tokens")
+            console.print(f"  [muted]Context usage: ~{estimated:,} / {self.runner.guard.max_tokens:,} tokens[/muted]")
             print_context(pct, bar)
-            print_info(f"  Messages: {len(self.messages)}")
+            console.print(f"  [muted]Messages: {len(self.messages)}[/muted]")
             return True
 
         elif cmd == "/compact":
@@ -161,26 +172,36 @@ class Cli:
             return True
         
         elif cmd == "/soul":
-            print_section("SOUL.md")
+            console.print(Rule(title="SOUL.md", style="accent"))
             soul = self.runner.bootstrap_data.get("SOUL.md", "")
-            print(soul) if soul else print_info("(未找到 SOUL.md)")
+            if soul:
+                console.print(soul)
+            else:
+                console.print("[muted](未找到 SOUL.md)[/muted]")
             return True
 
         elif cmd == "/skills":
-            print_section("已发现的技能")
+            console.print(Rule(title="已发现的技能", style="accent"))
             if not self.runner.skills_mgr.skills:
-                print_info("(未发现技能)")
+                console.print("[muted](未发现技能)[/muted]")
             else:
+                sk_table = Table(show_header=False, box=None, padding=(0, 2, 0, 0))
+                sk_table.add_column("invoke", style="info", no_wrap=True)
+                sk_table.add_column("detail")
                 for s in self.runner.skills_mgr.skills:
-                    print_tool_info(s)
+                    sk_table.add_row(s['invocation'], f"{s['name']} - {s['description']}")
+                    sk_table.add_row("", f"[muted]path: {s['path']}[/muted]")
+                console.print(sk_table)
             return True
 
         elif cmd == "/memory":
-            print_section("记忆统计")
             stats = self.runner.memory_store.get_stats()
-            print(f"  长期记忆 (MEMORY.md): {stats['evergreen_chars']} 字符")
-            print(f"  每日文件: {stats['daily_files']}")
-            print(f"  每日条目: {stats['daily_entries']}")
+            mem_text = (
+                f"  长期记忆 (MEMORY.md): {stats['evergreen_chars']} 字符\n"
+                f"  每日文件: {stats['daily_files']}\n"
+                f"  每日条目: {stats['daily_entries']}"
+            )
+            console.print(Panel(mem_text, title="记忆统计", border_style="accent"))
             return True
 
         elif cmd == "/search":
@@ -197,46 +218,57 @@ class Cli:
             return True
 
         elif cmd == "/prompt":
-            print_section("完整系统提示词")
+            console.print(Rule(title="完整系统提示词", style="accent"))
             prompt = build_system_prompt(
                 mode="full", bootstrap=self.runner.bootstrap_data,
                 skill_registry=self.runner.skill_registry,
                 channel="terminal",
             )
             if len(prompt) > 3000:
-                print(prompt[:3000] + "\n")
-                print_info(f"... ({len(prompt) - 3000} more chars, total {len(prompt)})")
+                console.print(Panel(prompt[:3000] + "\n", title="System Prompt (truncated)"))
+                console.print(f"[muted]... ({len(prompt) - 3000} more chars, total {len(prompt)})[/muted]")
             else:
-                print(prompt)
-            print_info(f"提示词总长度: {len(prompt)} 字符")
+                console.print(Panel(prompt, title="System Prompt"))
+            console.print(f"[muted]提示词总长度: {len(prompt)} 字符[/muted]")
             return True
 
         elif cmd == "/bootstrap":
-            print_section("Bootstrap 文件")
+            console.print(Rule(title="Bootstrap 文件", style="accent"))
             if not self.runner.bootstrap_data:
-                print_info("(未加载 Bootstrap 文件)")
+                console.print("[muted](未加载 Bootstrap 文件)[/muted]")
             else:
+                bsk_table = Table(show_header=False, box=None, padding=(0, 2, 0, 0))
+                bsk_table.add_column("name", style="info")
+                bsk_table.add_column("size")
                 for name, content in self.runner.bootstrap_data.items():
-                    print(f"  {BLUE}{name}{RESET}: {len(content)} chars")
+                    bsk_table.add_row(name, f"{len(content)} chars")
+                console.print(bsk_table)
             total = sum(len(v) for v in self.runner.bootstrap_data.values())
-            print(f"\n  {DIM}总计: {total} 字符 (上限: {MAX_TOTAL_CHARS}){RESET}")
+            console.print(f"  [muted]总计: {total} 字符 (上限: {MAX_TOTAL_CHARS})[/muted]")
             return True
         
         elif cmd == "/help":
-            print_info("  Commands:")
-            print_info("    /new [label]       Create a new session")
-            print_info("    /list              List all sessions")
-            print_info("    /switch <id>       Switch to a session (prefix match)")
-            print_info("    /context           Show context token usage")
-            print_info("    /compact           Manually compact conversation history")
-            print_info("    /soul              Show SOUL.md content")
-            print_info("    /skills            List discovered skills")
-            print_info("    /memory            Show memory stats")
-            print_info("    /search <query>    Search memory with a query")
-            print_info("    /prompt            Show the full system prompt")
-            print_info("    /bootstrap         Show loaded Bootstrap files")
-            print_info("    /help              Show this help")
-            print_info("    /quit /exit        Exit the REPL")
+            console.print()
+            help_table = Table(title="REPL 命令", border_style="muted")
+            help_table.add_column("命令", style="info", no_wrap=True)
+            help_table.add_column("说明")
+            for cmd_name, desc in [
+                ("/new [label]", "创建新会话"),
+                ("/list", "列出所有会话"),
+                ("/switch <id>", "切换到指定会话（前缀匹配）"),
+                ("/context", "显示上下文 token 用量"),
+                ("/compact", "手动压缩对话历史"),
+                ("/soul", "显示 SOUL.md 内容"),
+                ("/skills", "列出已发现的技能"),
+                ("/memory", "显示记忆统计"),
+                ("/search <query>", "搜索记忆"),
+                ("/prompt", "显示完整系统提示词"),
+                ("/bootstrap", "显示已加载的 Bootstrap 文件"),
+                ("/help", "显示此帮助"),
+                ("/quit /exit", "退出 REPL"),
+            ]:
+                help_table.add_row(cmd_name, desc)
+            console.print(help_table)
             return True
         
         return False
