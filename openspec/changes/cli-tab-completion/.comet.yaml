@@ -1,0 +1,17 @@
+workflow: full
+phase: build
+design_doc: docs/superpowers/specs/2026-06-22-cli-tab-completion-design.md
+plan: null
+base_ref: null
+build_mode: null
+build_pause: null
+isolation: null
+verify_mode: null
+verify_result: pending
+verification_report: null
+branch_status: pending
+created_at: 2026-06-22
+verified_at: null
+archived: false
+handoff_context: openspec/changes/cli-tab-completion/.comet/handoff/design-context.json
+handoff_hash: 46df3051cc20f109db0f20148252c6144e9b8cac0f8053086cfcbabe75cd6c16
