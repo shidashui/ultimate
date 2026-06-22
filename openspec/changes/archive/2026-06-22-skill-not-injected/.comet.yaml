@@ -1,5 +1,5 @@
 workflow: hotfix
-phase: open
+phase: archive
 design_doc: null
 plan: null
 base_ref: null
@@ -7,9 +7,9 @@ build_mode: direct
 build_pause: null
 isolation: branch
 verify_mode: light
-verify_result: pending
-verification_report: null
-branch_status: pending
+verify_result: pass
+verification_report: docs/superpowers/reports/2026-06-22-skill-not-injected-verify.md
+branch_status: handled
 created_at: 2026-06-22
 verified_at: null
-archived: false
+archived: true
