@@ -1,6 +1,7 @@
 import asyncio
 import json
 from utils.print_tools import *
+from rich.markdown import Markdown
 from config.configs import MAX_TOTAL_CHARS, MODEL, WORKSPACE_DIR
 
 from agentd.context.session import SessionStore
@@ -85,7 +86,9 @@ class Cli:
             )
         )
         if reply:
-            print_assistant(reply)
+            console.print()
+            console.print("Assistant:", style="success", end=" ")
+            console.print(Markdown(reply))
     
     def handle_repl_command(self, command: str) -> bool:
         """
