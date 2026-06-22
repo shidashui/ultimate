@@ -1,11 +1,11 @@
 workflow: full
 phase: build
 design_doc: docs/superpowers/specs/2026-06-22-cli-tab-completion-design.md
-plan: null
-base_ref: null
-build_mode: null
+plan: docs/superpowers/plans/2026-06-22-cli-tab-completion.md
+base_ref: f24b5e2c828655a0ceea08369cc21ef9923d0397
+build_mode: executing-plans
 build_pause: null
-isolation: null
+isolation: branch
 verify_mode: null
 verify_result: pending
 verification_report: null

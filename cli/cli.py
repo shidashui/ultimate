@@ -7,12 +7,22 @@ from agentd.context.session import SessionStore
 from agentd.prompt.prompts import build_system_prompt
 from agentd.agent.runner import AgentRunner
 
+from prompt_toolkit import PromptSession
+from prompt_toolkit.completion import WordCompleter
+
 
 class Cli:
     def __init__(self):
         self.store = SessionStore(base_dir=WORKSPACE_DIR, agent_id="zero")
         self.messages: list[dict] = []
         self.runner = AgentRunner()
+        self._completer = WordCompleter(
+            ["/new", "/list", "/switch", "/context", "/compact",
+             "/soul", "/skills", "/memory", "/search",
+             "/prompt", "/bootstrap", "/help", "/quit", "/exit"],
+            ignore_case=True,
+        )
+        self._session = PromptSession(completer=self._completer)
 
     def init_run(self):
         user_name = input("请输入你的名字: ").strip() or "User"
@@ -52,7 +62,7 @@ class Cli:
         self.init_run()
         while True:
             try:
-                user_input = input(colored_prompt()).strip()
+                user_input = self._session.prompt(colored_prompt()).strip()
             except (KeyboardInterrupt, EOFError):
                 print_info("退出系统。")
                 break
