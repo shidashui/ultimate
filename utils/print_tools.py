@@ -20,11 +20,21 @@ THEME = Theme({
 
 console = Console(theme=THEME)
 
+# 用于将 rich markup 渲染为 ANSI 字符串（供 prompt_toolkit 使用）
+_ansi_console = Console(theme=THEME, force_terminal=True, color_system="standard")
+
+
+def _ansi_render(markup: str) -> str:
+    """将 rich markup 字符串渲染为 ANSI 转义码字符串。"""
+    with _ansi_console.capture() as capture:
+        _ansi_console.print(markup, end="")
+    return capture.get()
+
 
 # ── 提示符函数 ────────────────────────────────────────────
 def colored_prompt() -> str:
-    """返回 prompt_toolkit 可用的用户提示符字符串。"""
-    return "[primary]You > [/primary]"
+    """返回 prompt_toolkit 可用的 ANSI 字符串。"""
+    return _ansi_render("[primary]You > [/primary]")
 
 
 def API_error_prompt(exc: Exception) -> str:
