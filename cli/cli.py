@@ -58,8 +58,7 @@ class Cli:
             border_style="primary",
         ))
         console.print("[muted]  /help 获取指令帮助, /quit 或 /exit 退出[/muted]")
-        print()
-
+        console.print()
         print_assistant(f"你好{user_name}！我是你的智能助理。有什么我可以帮你的吗？")
 
     def run(self):
