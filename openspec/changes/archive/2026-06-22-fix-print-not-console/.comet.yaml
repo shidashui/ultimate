@@ -1,0 +1,16 @@
+workflow: hotfix
+phase: archive
+build_mode: direct
+build_pause: null
+isolation: branch
+verify_mode: light
+base_ref: e542dd822666f034b8bde96c0e2fcc8d92a91c80
+design_doc: null
+plan: null
+verify_result: pass
+verification_report: docs/superpowers/reports/2026-06-22-fix-print-not-console-verify.md
+branch_status: handled
+created_at: 2026-06-22
+verified_at: 2026-06-22
+archived: true
+build_command: python -c "from cli.cli import Cli; print('Build OK')"
