@@ -46,7 +46,7 @@ class Cli:
 
         stats = self.runner.memory_store.get_stats()
         info_lines = [
-            f"[primary]当前模型:[/primary] {MODEL['name']}",
+            f"[primary]当前模型:[/primary] {MODEL.default}",
             f"[primary]会话ID:[/primary] {self.store.current_session_id}",
             f"[primary]工具列表:[/primary] {', '.join(self.runner.container.tools_handlers.keys())}",
             f"[primary]工作区:[/primary] {WORKSPACE_DIR}",

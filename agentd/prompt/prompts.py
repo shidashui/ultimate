@@ -81,7 +81,7 @@ def build_system_prompt(
     # 第 7 层: 运行时上下文（时间戳移入 user message 每轮动态注入）
     sections.append(
         f"## Runtime Context\n\n"
-        f"- Agent ID: {agent_id}\n- Model: {MODEL['name']}\n"
+        f"- Agent ID: {agent_id}\n- Model: {MODEL.default}\n"
         f"- Channel: {channel}\n- Prompt mode: {mode}"
     )
 

@@ -27,7 +27,7 @@ class Container:
         skills_mgr = SkillsManager(WORKSPACE_DIR)
         skills_mgr.discover()
         memory_store = MemoryStore(WORKSPACE_DIR)
-        # Provider — 由 config.json 驱动
+        # Provider — 由 config.yaml 驱动
         provider = get_model_provider()
         guard = ContextGuard(provider=provider)
 
