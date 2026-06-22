@@ -169,7 +169,11 @@ class Cli:
                 print_info("  Too few messages to compact (need > 4).")
                 return True
             print_session("  Compacting history...")
-            new_messages = self.runner.guard.compact_history(self.messages)
+
+            async def _compact():
+                return await self.runner.guard.compact_history(self.messages)
+            new_messages = asyncio.run(_compact())
+
             print_session(f"  {len(self.messages)} -> {len(new_messages)} messages")
             self.messages = new_messages
             return True
