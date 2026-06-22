@@ -20,6 +20,7 @@ import yaml
 @dataclass
 class ProviderConfig:
     name: str
+    model: str
     base_url: str
     api_key_env: str
     api_key: str = ""  # 运行时从 os.environ 注入
@@ -122,10 +123,13 @@ def load_config(path: str | Path | None = None) -> Config:
     providers = []
     default_provider_raw = None
     for p in model_raw.get("providers", []):
+        api_key = p.get("api_key", "")
         api_key_env = p.get("api_key_env", "")
-        api_key = os.environ.get(api_key_env, "")
+        if not api_key:
+            api_key = os.environ.get(api_key_env, "")
         provider = ProviderConfig(
             name=p.get("name", ""),
+            model=p.get("model", ""),
             base_url=p.get("base_url", ""),
             api_key_env=api_key_env,
             api_key=api_key,

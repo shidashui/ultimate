@@ -8,12 +8,16 @@ model:
 
   providers:
     - name: deepseek
+      model: deepseek-v4-flash
       base_url: https://api.deepseek.com/anthropic
       # API key 从环境变量读取（不允许明文写在配置文件中）
+      api_key: ""  # 可选，优先级低于 api_key_env
       api_key_env: DEEPSEEK_API_KEY
 
     - name: openrouter
+      model: openrouter-model
       base_url: https://openrouter.ai/api/v1
+      api_key: ""  # 可选，优先级低于 api_key_env
       api_key_env: OPENROUTER_API_KEY
 
     # 添加更多 provider 示例：

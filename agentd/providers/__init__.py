@@ -35,7 +35,7 @@ def get_provider(config) -> BaseProvider:
     return AnthropicProvider(
         api_key=provider_cfg.api_key,
         base_url=provider_cfg.base_url,
-        model=config.model.default,
+        model=provider_cfg.model,
     )
 
 
