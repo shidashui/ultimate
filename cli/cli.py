@@ -273,5 +273,12 @@ class Cli:
                 help_table.add_row(cmd_name, desc)
             console.print(help_table)
             return True
-        
+
+        # ── 动态技能匹配 ────────────────────────────
+        for skill in self.runner.skills_mgr.skills:
+            if cmd == skill.get("invocation", ""):
+                print_section(f"技能: {skill['name']}")
+                console.print(f"  [muted]{skill['description']}[/muted]")
+                return False  # 交给 AI，AI 从 skill_registry 识别并调用 skill_invoke
+
         return False
