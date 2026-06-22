@@ -1,0 +1,14 @@
+{
+  "change": "beautify-cli-io",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "55a8ebeec1709e7fea23b9d6ffd1ea8d9c9a5c4823ebf199228144e7726f5367",
+  "files": [
+    { "path": "openspec/changes/beautify-cli-io/proposal.md", "sha256": "80f4cc831da5dcb8742d09ec05c6bafb06fdcdab1d5bbcec5c8082b43d030fed" },
+    { "path": "openspec/changes/beautify-cli-io/design.md", "sha256": "93e3bb953d461c7d5d0b7a7dcf440293359982ccd8e70a3379eb356edb9ca480" },
+    { "path": "openspec/changes/beautify-cli-io/tasks.md", "sha256": "bdcfe794762e4d893cfa70b59ebaf25c2a0e75ced708b2c8b71d02d374ac48ce" },
+    { "path": "openspec/changes/beautify-cli-io/specs/cli-beautify/spec.md", "sha256": "6481474c1ad88e19e77e3a068d5a8c58ef63559df3293d7e89ae2201d14d1ca3" }
+  ]
+}
