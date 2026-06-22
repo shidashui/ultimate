@@ -7,6 +7,8 @@ from rich.text import Text
 from rich.panel import Panel
 from rich.table import Table
 
+from prompt_toolkit.formatted_text import FormattedText
+
 # ── Rich Console + 统一 Theme ──────────────────────────────
 THEME = Theme({
     "primary": "cyan bold",      # 用户提示符
@@ -20,21 +22,11 @@ THEME = Theme({
 
 console = Console(theme=THEME)
 
-# 用于将 rich markup 渲染为 ANSI 字符串（供 prompt_toolkit 使用）
-_ansi_console = Console(theme=THEME, force_terminal=True, color_system="standard")
-
-
-def _ansi_render(markup: str) -> str:
-    """将 rich markup 字符串渲染为 ANSI 转义码字符串。"""
-    with _ansi_console.capture() as capture:
-        _ansi_console.print(markup, end="")
-    return capture.get()
-
 
 # ── 提示符函数 ────────────────────────────────────────────
-def colored_prompt() -> str:
-    """返回 prompt_toolkit 可用的 ANSI 字符串。"""
-    return _ansi_render("[primary]You > [/primary]")
+def colored_prompt():
+    """返回 prompt_toolkit FormattedText（原生样式，不经过 rich→ANSI）。"""
+    return FormattedText([("ansicyan bold", "You > ")])
 
 
 def API_error_prompt(exc: Exception) -> str:
