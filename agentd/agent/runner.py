@@ -52,7 +52,7 @@ class AgentRunner:
     def _serialize(response) -> list[dict]:
         result = []
         for block in response.content:
-            if hasattr(block, "text"):
+            if block.type == "text":
                 result.append({"type": "text", "text": block.text})
             elif block.type == "tool_use":
                 result.append({
@@ -66,7 +66,7 @@ class AgentRunner:
     @staticmethod
     def _extract_text(response) -> str:
         return "".join(
-            block.text for block in response.content if hasattr(block, "text")
+            block.text for block in response.content if block.type == "text"
         )
 
     @staticmethod
@@ -121,7 +121,7 @@ class AgentRunner:
             budget.consume()
 
             # 预飞压缩：主动检查 token，超阈值先压缩
-            messages = self.guard.preflight(self._cached_system_prompt, messages)
+            messages = await self.guard.preflight(self._cached_system_prompt, messages)
 
             try:
                 response = await self.guard.async_guard_api_call(
@@ -135,7 +135,7 @@ class AgentRunner:
                 self._rollback(messages)
                 return ""
 
-            messages.append({"role": "assistant", "content": response.content})
+            messages.append({"role": "assistant", "content": self._serialize(response)})
             store.save_turn("assistant", self._serialize(response))
 
             if response.stop_reason == "end_turn":
