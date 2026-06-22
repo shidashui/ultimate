@@ -272,6 +272,17 @@ class Cli:
             ]:
                 help_table.add_row(cmd_name, desc)
             console.print(help_table)
+            # ── 可用技能段 ────────────────────────────
+            console.print()
+            console.print(Rule(title="可用技能", style="accent"))
+            if self.runner.skills_mgr.skills:
+                for skill in self.runner.skills_mgr.skills:
+                    inv = skill.get("invocation", "")
+                    name = skill.get("name", "")
+                    desc = skill.get("description", "")
+                    console.print(f"  [info]{inv}[/info]  {name} — [muted]{desc}[/muted]")
+            else:
+                console.print("  [muted](无可用技能)[/muted]")
             return True
 
         # ── 动态技能匹配 ────────────────────────────
