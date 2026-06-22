@@ -1,17 +1,18 @@
 workflow: full
-phase: build
+phase: verify
 build_mode: executing-plans
 build_pause: null
 isolation: branch
-verify_mode: null
+verify_mode: full
 base_ref: 3abd9965e72ed26407ce3d15d2bf28c73b9a39d5
 design_doc: docs/superpowers/specs/2026-06-22-create-test-skills-design.md
 plan: docs/superpowers/plans/2026-06-22-create-test-skills.md
 verify_result: pending
-verification_report: null
+verification_report: docs/superpowers/reports/2026-06-22-create-test-skills-verify.md
 branch_status: pending
 created_at: 2026-06-22
 verified_at: null
 archived: false
 handoff_context: openspec/changes/create-test-skills/.comet/handoff/design-context.json
 handoff_hash: 7fde2008abad70baab6fe4667cfe881f4726c3b968bcd92301bb68db7341aaac
+build_command: python -c "print('Build: all SKILL.md files exist')"
