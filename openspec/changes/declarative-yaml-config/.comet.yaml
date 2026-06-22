@@ -1,5 +1,5 @@
 workflow: full
-phase: verify
+phase: archive
 build_mode: executing-plans
 build_pause: null
 isolation: branch
@@ -8,11 +8,11 @@ build_command: python -c "from config.configs import get_config; from agentd.boo
 base_ref: 8c9a2f50ef893ed79765601536a3d2a9bd367429
 design_doc: docs/superpowers/specs/2026-06-22-declarative-yaml-config-design.md
 plan: docs/superpowers/plans/2026-06-22-declarative-yaml-config.md
-verify_result: pending
+verify_result: pass
 verification_report: docs/superpowers/reports/2026-06-22-declarative-yaml-config-verify.md
 branch_status: handled
 created_at: 2026-06-22
-verified_at: null
+verified_at: 2026-06-22
 archived: false
 handoff_context: openspec/changes/declarative-yaml-config/.comet/handoff/design-context.json
 handoff_hash: ac14788d44f470429e988b2aa1b4662bb4364c920f95b2ea0cfeaeee5cfa78b3
