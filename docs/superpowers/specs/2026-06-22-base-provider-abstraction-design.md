@@ -2,6 +2,8 @@
 comet_change: base-provider-abstraction
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-06-22-base-provider-abstraction
+status: final
 ---
 
 # BaseProvider Abstraction — 技术设计

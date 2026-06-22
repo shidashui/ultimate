@@ -2,6 +2,7 @@
 change: base-provider-abstraction
 design-doc: docs/superpowers/specs/2026-06-22-base-provider-abstraction-design.md
 base-ref: db343df2106d73edfe23761fd94a32287696a807
+archived-with: 2026-06-22-base-provider-abstraction
 ---
 
 # BaseProvider Abstraction 实施计划
@@ -24,6 +25,7 @@ base-ref: db343df2106d73edfe23761fd94a32287696a807
 - v1 无流式，无 `create_stream`
 - 实现完成后删除 `utils/clients.py`
 
+archived-with: 2026-06-22-base-provider-abstraction
 ---
 
 ### Task 1: Create BaseProvider ABC + normalized types
@@ -126,6 +128,7 @@ git commit -m "feat: add BaseProvider ABC and normalized types"
 
 Mark Task 1 `[x]` in `openspec/changes/base-provider-abstraction/tasks.md`.
 
+archived-with: 2026-06-22-base-provider-abstraction
 ---
 
 ### Task 2: Implement AnthropicProvider
@@ -221,6 +224,7 @@ git commit -m "feat: implement AnthropicProvider"
 
 Mark Task 2 `[x]` in `openspec/changes/base-provider-abstraction/tasks.md`.
 
+archived-with: 2026-06-22-base-provider-abstraction
 ---
 
 ### Task 3: Update ContextGuard to use BaseProvider
@@ -603,6 +607,7 @@ git commit -m "refactor: ContextGuard uses BaseProvider, remove sync methods"
 
 Mark Task 3 `[x]` in `openspec/changes/base-provider-abstraction/tasks.md`.
 
+archived-with: 2026-06-22-base-provider-abstraction
 ---
 
 ### Task 4: Update AgentRunner serialization
@@ -748,6 +753,7 @@ git commit -m "refactor: AgentRunner serialization uses normalized types"
 
 Mark Task 4 `[x]` in `openspec/changes/base-provider-abstraction/tasks.md`.
 
+archived-with: 2026-06-22-base-provider-abstraction
 ---
 
 ### Task 5: Wire provider selection from config
@@ -895,6 +901,7 @@ git commit -m "refactor: wire provider from config, delete utils/clients.py"
 
 Mark Task 5 `[x]` in `openspec/changes/base-provider-abstraction/tasks.md`.
 
+archived-with: 2026-06-22-base-provider-abstraction
 ---
 
 ### Task 6: Update CLI/Gateway entry points
@@ -972,6 +979,7 @@ git commit -m "fix: /compact uses async compact_history"
 
 Mark Task 6 `[x]` in `openspec/changes/base-provider-abstraction/tasks.md`.
 
+archived-with: 2026-06-22-base-provider-abstraction
 ---
 
 ### Task 7: Verify end-to-end
@@ -1037,6 +1045,7 @@ git add openspec/changes/base-provider-abstraction/tasks.md
 git commit -m "chore: mark all tasks complete, verify end-to-end"
 ```
 
+archived-with: 2026-06-22-base-provider-abstraction
 ---
 
 ## 完成验证
