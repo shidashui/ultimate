@@ -2,6 +2,7 @@
 change: create-test-skills
 design-doc: docs/superpowers/specs/2026-06-22-create-test-skills-design.md
 base-ref: 3abd9965e72ed26407ce3d15d2bf28c73b9a39d5
+archived-with: 2026-06-22-create-test-skills
 ---
 
 # Test Skills Implementation Plan
@@ -19,6 +20,7 @@ base-ref: 3abd9965e72ed26407ce3d15d2bf28c73b9a39d5
 - SKILL.md 必须包含 `---` frontmatter，字段：name, description
 - tasks.md 完成后勾选对应任务
 
+archived-with: 2026-06-22-create-test-skills
 ---
 
 ### Task 1: hello-skill
@@ -29,9 +31,11 @@ base-ref: 3abd9965e72ed26407ce3d15d2bf28c73b9a39d5
 - [ ] **Step 1: 创建 `workspace/skills/hello-skill/SKILL.md`**
 
 ```markdown
+archived-with: 2026-06-22-create-test-skills
 ---
 name: hello-skill
 description: 最简单的测试 skill - 输出问候语
+archived-with: 2026-06-22-create-test-skills
 ---
 
 # Hello Skill
@@ -56,6 +60,7 @@ git add workspace/skills/hello-skill/SKILL.md
 git commit -m "feat: add hello-skill test skill"
 ```
 
+archived-with: 2026-06-22-create-test-skills
 ---
 
 ### Task 2: echo-args
@@ -66,9 +71,11 @@ git commit -m "feat: add hello-skill test skill"
 - [ ] **Step 1: 创建 `workspace/skills/echo-args/SKILL.md`**
 
 ```markdown
+archived-with: 2026-06-22-create-test-skills
 ---
 name: echo-args
 description: 测试 skill - 接收参数并回显
+archived-with: 2026-06-22-create-test-skills
 ---
 
 # Echo Args Skill
@@ -94,6 +101,7 @@ git add workspace/skills/echo-args/SKILL.md
 git commit -m "feat: add echo-args test skill"
 ```
 
+archived-with: 2026-06-22-create-test-skills
 ---
 
 ### Task 3: system-info
@@ -104,9 +112,11 @@ git commit -m "feat: add echo-args test skill"
 - [ ] **Step 1: 创建 `workspace/skills/system-info/SKILL.md`**
 
 ```markdown
+archived-with: 2026-06-22-create-test-skills
 ---
 name: system-info
 description: 测试 skill - 输出当前系统环境信息
+archived-with: 2026-06-22-create-test-skills
 ---
 
 # System Info Skill

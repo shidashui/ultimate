@@ -2,6 +2,8 @@
 comet_change: create-test-skills
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-06-22-create-test-skills
+status: final
 ---
 
 # Test Skills — 技术设计

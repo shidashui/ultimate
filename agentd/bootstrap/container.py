@@ -25,6 +25,7 @@ class Container:
         loader = BootstrapLoader(WORKSPACE_DIR)
         bootstrap_data = loader.load_all(mode="full")
         skills_mgr = SkillsManager(WORKSPACE_DIR)
+        skills_mgr.discover()
         memory_store = MemoryStore(WORKSPACE_DIR)
         guard = ContextGuard()
 
