@@ -22,3 +22,9 @@ MAX_SKILLS_PROMPT = 30000
 MAX_TOOL_ITERATIONS = 30
 
 MODEL = json.loads((WORKDIR / "config.json").read_text())["model"]
+
+
+def get_model_provider():
+    """返回基于 config.json 的 BaseProvider 实例。"""
+    from agentd.providers import get_provider
+    return get_provider(MODEL)
