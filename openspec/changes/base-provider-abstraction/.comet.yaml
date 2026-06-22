@@ -1,17 +1,18 @@
 workflow: full
-phase: build
+phase: verify
 build_mode: executing-plans
 build_pause: null
 isolation: branch
-verify_mode: null
+verify_mode: light
 base_ref: 2d1577d8e12f369b672906dd114884c5a96d46e9
 design_doc: docs/superpowers/specs/2026-06-22-base-provider-abstraction-design.md
 plan: docs/superpowers/plans/2026-06-22-base-provider-abstraction.md
 verify_result: pending
-verification_report: null
+verification_report: docs/superpowers/reports/2026-06-22-base-provider-abstraction-verify.md
 branch_status: pending
 created_at: 2026-06-22
 verified_at: null
 archived: false
 handoff_context: openspec/changes/base-provider-abstraction/.comet/handoff/design-context.json
 handoff_hash: 0761c9da8ff1a8cd65685bb7f5ad21554f0b23830678a8563e26ada2943d31fb
+build_command: python -m py_compile agentd/providers/base.py agentd/providers/anthropic.py agentd/providers/__init__.py agentd/context/context.py agentd/agent/runner.py agentd/bootstrap/container.py cli/cli.py gateway/gateway.py
