@@ -2,6 +2,7 @@
 change: declarative-yaml-config
 design-doc: docs/superpowers/specs/2026-06-22-declarative-yaml-config-design.md
 base-ref: 7288179c77c1cb3af0e7d2a23ac2e5007bc327c3
+archived-with: 2026-06-22-declarative-yaml-config
 ---
 
 # 声明式 YAML 配置 — 实施计划
@@ -23,6 +24,7 @@ base-ref: 7288179c77c1cb3af0e7d2a23ac2e5007bc327c3
 - `config.example.yaml` 提交 git，`config.yaml` gitignored
 - `pyyaml` 加入 `requirements.txt`
 
+archived-with: 2026-06-22-declarative-yaml-config
 ---
 
 ### Task 1: Config dataclass + YAML loader + config.example.yaml
@@ -543,6 +545,7 @@ git commit -m "feat: Config dataclass + YAML loader + config.example.yaml
 - pyyaml in requirements.txt"
 ```
 
+archived-with: 2026-06-22-declarative-yaml-config
 ---
 
 ### Task 2: Adapt provider factory for multi-provider dispatch
@@ -670,6 +673,7 @@ git commit -m "feat: multi-provider factory dispatch from Config object
 - ValueError fallback if default not in providers list"
 ```
 
+archived-with: 2026-06-22-declarative-yaml-config
 ---
 
 ### Task 3: Update all consumers to use new Config object
@@ -817,6 +821,7 @@ git commit -m "refactor: update consumers to use Config object
 - All other consumers work via backward compat aliases"
 ```
 
+archived-with: 2026-06-22-declarative-yaml-config
 ---
 
 ### Task 4: Cleanup old config + verify end-to-end

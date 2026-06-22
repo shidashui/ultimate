@@ -13,6 +13,6 @@ verification_report: docs/superpowers/reports/2026-06-22-declarative-yaml-config
 branch_status: handled
 created_at: 2026-06-22
 verified_at: 2026-06-22
-archived: false
+archived: true
 handoff_context: openspec/changes/declarative-yaml-config/.comet/handoff/design-context.json
 handoff_hash: ac14788d44f470429e988b2aa1b4662bb4364c920f95b2ea0cfeaeee5cfa78b3

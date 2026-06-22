@@ -2,6 +2,8 @@
 comet_change: declarative-yaml-config
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-06-22-declarative-yaml-config
+status: final
 ---
 
 # 声明式 YAML 配置 — 技术设计
