@@ -1,0 +1,14 @@
+{
+  "change": "create-test-skills",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "7fde2008abad70baab6fe4667cfe881f4726c3b968bcd92301bb68db7341aaac",
+  "files": [
+    { "path": "openspec/changes/create-test-skills/proposal.md", "sha256": "7f0878776dbe9c1d71cec509822d4b520554bd25701dc4c92443f8f0551dc12e" },
+    { "path": "openspec/changes/create-test-skills/design.md", "sha256": "2cc3142a2aa3dcd26c75cc607b62bb48ca9e66ffd4fc3e551d6bd9733e508092" },
+    { "path": "openspec/changes/create-test-skills/tasks.md", "sha256": "5c464ab124fb78875389a9ffc41992380318c4e8bcb23e2165c10dad3e58184c" },
+    { "path": "openspec/changes/create-test-skills/specs/test-skills/spec.md", "sha256": "56a66cd01a891616574da2db2303ded78864788df50b5d93f8ee276e9cb934d7" }
+  ]
+}
