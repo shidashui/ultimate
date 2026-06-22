@@ -17,15 +17,19 @@ class Cli:
         self.store = SessionStore(base_dir=WORKSPACE_DIR, agent_id="zero")
         self.messages: list[dict] = []
         self.runner = AgentRunner()
-        self._completer = WordCompleter(
-            ["/new", "/list", "/switch", "/context", "/compact",
-             "/soul", "/skills", "/memory", "/search",
-             "/prompt", "/bootstrap", "/help", "/quit", "/exit"],
-            ignore_case=True,
-        )
-        self._session = PromptSession(completer=self._completer)
 
     def init_run(self):
+        # 构建动态补全列表（硬编码命令 + 技能调用名）
+        commands = ["/new", "/list", "/switch", "/context", "/compact",
+                    "/soul", "/skills", "/memory", "/search",
+                    "/prompt", "/bootstrap", "/help", "/quit", "/exit"]
+        for skill in self.runner.skills_mgr.skills:
+            inv = skill.get("invocation", "")
+            if inv and inv not in commands:
+                commands.append(inv)
+        self._completer = WordCompleter(commands, ignore_case=True)
+        self._session = PromptSession(completer=self._completer)
+
         user_name = input("请输入你的名字: ").strip() or "User"
         self.store.set_user_name(user_name)
 
