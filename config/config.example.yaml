@@ -1,0 +1,52 @@
+# ultimate agent — 声明式配置模板
+# cp config.example.yaml config.yaml 并填写你的配置
+
+# ── Model: LLM provider 配置 ──────────────────────────────────
+model:
+  # 当前使用的 provider（必须匹配下面 providers 列表中某个 name）
+  default: deepseek
+
+  providers:
+    - name: deepseek
+      base_url: https://api.deepseek.com/anthropic
+      # API key 从环境变量读取（不允许明文写在配置文件中）
+      api_key_env: DEEPSEEK_API_KEY
+
+    - name: openrouter
+      base_url: https://openrouter.ai/api/v1
+      api_key_env: OPENROUTER_API_KEY
+
+    # 添加更多 provider 示例：
+    # - name: anthropic
+    #   base_url: https://api.anthropic.com
+    #   api_key_env: ANTHROPIC_API_KEY
+
+# ── Toolsets: 工具集开关 ─────────────────────────────────────
+toolsets:
+  enabled: [memory, file, browser, skill]
+  disabled: []
+
+# ── Agent: 运行时参数 ─────────────────────────────────────────
+agent:
+  max_iterations: 30       # 单轮对话最大工具调用次数
+  context_safe_limit: 180000  # 上下文 token 安全阈值
+  max_tool_output: 50000   # 单个工具输出最大字符数
+
+# ── Workspace: 工作区与 Bootstrap ─────────────────────────────
+workspace:
+  bootstrap_files:
+    - SOUL.md
+    - IDENTITY.md
+    - TOOLS.md
+    - USER.md
+    - HEARTBEAT.md
+    - BOOTSTRAP.md
+    - AGENTS.md
+    - MEMORY.md
+  max_file_chars: 20000
+  max_total_chars: 150000
+
+# ── Skills: 技能系统 ──────────────────────────────────────────
+skills:
+  max_skills: 150
+  max_skills_prompt: 30000
