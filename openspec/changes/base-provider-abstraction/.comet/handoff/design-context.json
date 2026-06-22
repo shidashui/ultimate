@@ -1,0 +1,14 @@
+{
+  "change": "base-provider-abstraction",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "0761c9da8ff1a8cd65685bb7f5ad21554f0b23830678a8563e26ada2943d31fb",
+  "files": [
+    { "path": "openspec/changes/base-provider-abstraction/proposal.md", "sha256": "682746e852c4a1d8c61c2fae25d6cd272a0a6fe26935065c1dd9377e88c6de39" },
+    { "path": "openspec/changes/base-provider-abstraction/design.md", "sha256": "f27173bfb6b2b5cd5410d6ff92e3f1572c631563b5f05f376897c22a9d7f4059" },
+    { "path": "openspec/changes/base-provider-abstraction/tasks.md", "sha256": "c40035f66ff5e0d6eb6172cae7673d5d77548f5f3aac916bc124b3d8d523d5fe" },
+    { "path": "openspec/changes/base-provider-abstraction/specs/base-provider/spec.md", "sha256": "c54eee84f26e070e900668e9bdef3a79b8d5e77173d99e8f4ac2f3bd3380c753" }
+  ]
+}
