@@ -12,6 +12,7 @@ verification_report: null
 branch_status: pending
 created_at: 2026-06-22
 verified_at: null
+build_command: python -m py_compile cli/cli.py
 archived: false
 handoff_context: openspec/changes/cli-skill-routing/.comet/handoff/design-context.json
 handoff_hash: a51d3aeed7d6d203cbf0f19eb243d0e19c4e20774cbaf2e12d3c72627b4c770e
