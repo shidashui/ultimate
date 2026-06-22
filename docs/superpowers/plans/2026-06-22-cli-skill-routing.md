@@ -2,6 +2,7 @@
 change: cli-skill-routing
 design-doc: docs/superpowers/specs/2026-06-22-cli-skill-routing-design.md
 base-ref: d92f1454937bd5de2a48a5a8c093e42d6e8fb967
+archived-with: 2026-06-22-cli-skill-routing
 ---
 
 # CLI Skill Routing 实施计划
@@ -20,6 +21,7 @@ base-ref: d92f1454937bd5de2a48a5a8c093e42d6e8fb967
 - 硬编码命令优先于动态技能匹配
 - 所有改动仅在 `cli/cli.py` 的 `Cli` 类中
 
+archived-with: 2026-06-22-cli-skill-routing
 ---
 
 ### Task 1: 动态 Tab 补全
@@ -79,6 +81,7 @@ git commit -m "feat: dynamic tab completion from skills_mgr"
 
 将 `openspec/changes/cli-skill-routing/tasks.md` 中 Task 1 勾选为 `[x]`。
 
+archived-with: 2026-06-22-cli-skill-routing
 ---
 
 ### Task 2: 技能路由
@@ -139,6 +142,7 @@ git commit -m "feat: skill routing in handle_repl_command"
 
 将 `openspec/changes/cli-skill-routing/tasks.md` 中 Task 2 勾选为 `[x]`。
 
+archived-with: 2026-06-22-cli-skill-routing
 ---
 
 ### Task 3: /help 集成
@@ -223,6 +227,7 @@ git commit -m "feat: show available skills in /help"
 
 将 `openspec/changes/cli-skill-routing/tasks.md` 中 Task 3 勾选为 `[x]`。
 
+archived-with: 2026-06-22-cli-skill-routing
 ---
 
 ## 完成验证

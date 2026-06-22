@@ -2,6 +2,8 @@
 comet_change: cli-skill-routing
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-06-22-cli-skill-routing
+status: final
 ---
 
 # CLI Skill Routing — 技术设计
