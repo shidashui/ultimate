@@ -1,10 +1,7 @@
 import json
 from typing import Any
-from anthropic import Anthropic
 from config.configs import CONTEXT_SAFE_LIMIT
 from utils.print_tools import print_session, print_warn
-from utils.clients import message_client, message_client_stream, async_message_client
-import asyncio
 
 
 def _serialize_messages_for_summary(messages: list[dict]) -> str:
@@ -50,11 +47,13 @@ class ContextGuard:
 
     PREFLIGHT_RATIO = 0.8  # 80% 阈值触发预飞压缩
 
-    def __init__(self, max_tokens: int = CONTEXT_SAFE_LIMIT):
+    def __init__(self, max_tokens: int = CONTEXT_SAFE_LIMIT, provider=None):
         self.max_tokens = max_tokens
+        self._provider = provider
 
-    @staticmethod
-    def estimate_tokens(text: str) -> int:
+    def estimate_tokens(self, text: str) -> int:
+        if self._provider is not None:
+            return self._provider.estimate_tokens(text)
         return len(text) // 4
 
     def estimate_messages_tokens(self, messages: list[dict]) -> int:
@@ -85,7 +84,7 @@ class ContextGuard:
                             )
         return total
 
-    def preflight(self, system: str, messages: list[dict]) -> list[dict]:
+    async def preflight(self, system: str, messages: list[dict]) -> list[dict]:
         """预飞检查：估算 token 总量，超阈值主动压缩后返回。
 
         不超阈值时返回原 messages（零开销）。
@@ -98,7 +97,7 @@ class ContextGuard:
                 f"(>{self.PREFLIGHT_RATIO*100:.0f}% threshold), compacting..."
             )
             try:
-                return self.compact_history(messages)
+                return await self.compact_history(messages)
             except Exception as exc:
                 print_warn(f"  [preflight] compact failed: {exc}, skipping")
                 return messages
@@ -115,67 +114,8 @@ class ContextGuard:
         head = result[:cut]
         return head + f"\n\n[... truncated ({len(result)} chars total, showing first {len(head)}) ...]"
 
-    def compact_history(self, messages: list[dict]) -> list[dict]:
-        """
-        将前 50% 的消息压缩为 LLM 生成的摘要。
-        保留最后 N 条消息 (N = max(4, 总数的 20%)) 不变。
-        """
-        total = len(messages)
-        if total <= 4:
-            return messages
-
-        keep_count = max(4, int(total * 0.2))
-        compress_count = max(2, int(total * 0.5))
-        compress_count = min(compress_count, total - keep_count)
-
-        if compress_count < 2:
-            return messages
-
-        old_messages = messages[:compress_count]
-        recent_messages = messages[compress_count:]
-
-        old_text = _serialize_messages_for_summary(old_messages)
-
-        summary_prompt = (
-            "Summarize the following conversation concisely, "
-            "preserving key facts and decisions. "
-            "Output only the summary, no preamble.\n\n"
-            f"{old_text}"
-        )
-
-        try:
-            summary_resp = message_client(
-                max_tokens=2048, 
-                system="You are a conversation summarizer. Be concise and factual.", 
-                messages=[{"role": "user", "content": summary_prompt}]
-            )
-            summary_text = ""
-            for block in summary_resp.content:
-                if hasattr(block, "text"):
-                    summary_text += block.text
-
-            print_session(
-                f"  [compact] {len(old_messages)} messages -> summary "
-                f"({len(summary_text)} chars)"
-            )
-        except Exception as exc:
-            print_warn(f"  [compact] Summary failed ({exc}), dropping old messages")
-            return recent_messages
-
-        compacted = [
-            {
-                "role": "user",
-                "content": "[Previous conversation summary]\n" + summary_text,
-            },
-            {
-                "role": "assistant",
-                "content": [{"type": "text", "text": "Understood, I have the context from our previous conversation."}],
-            },
-        ]
-        compacted.extend(recent_messages)
-        return compacted
-
-    async def async_compact_history(self, messages: list[dict]) -> list[dict]:
+    async def compact_history(self, messages: list[dict]) -> list[dict]:
+        """将前 50% 的消息压缩为 LLM 生成的摘要。"""
         total = len(messages)
         if total <= 4:
             return messages
@@ -199,13 +139,13 @@ class ContextGuard:
         )
 
         try:
-            summary_resp = await async_message_client(
-                max_tokens=2048,
-                system="You are a conversation summarizer. Be concise and factual.",
+            summary_resp = await self._provider.chat(
                 messages=[{"role": "user", "content": summary_prompt}],
+                system="You are a conversation summarizer. Be concise and factual.",
+                max_tokens=2048,
             )
             summary_text = "".join(
-                block.text for block in summary_resp.content if hasattr(block, "text")
+                block.text for block in summary_resp.content if block.type == "text"
             )
             print_session(
                 f"  [compact] {len(old_messages)} messages -> summary "
@@ -248,104 +188,6 @@ class ContextGuard:
                 result.append(msg)
         return result
 
-    def guard_api_call(
-        self,
-        system: str,
-        messages: list[dict],
-        tools: list[dict] | None = None,
-        max_retries: int = 1,
-    ) -> Any:
-        """
-        三阶段重试:
-          第0次尝试: 正常调用
-          第1次尝试: 截断过大的工具结果
-          第2次尝试: 通过 LLM 摘要压缩历史
-        """
-        current_messages = messages
-
-        for attempt in range(max_retries + 1):
-            try:
-                kwargs: dict[str, Any] = {
-                    "max_tokens": 8096,
-                    "system": system,
-                    "messages": current_messages,
-                }
-                if tools:
-                    kwargs["tools"] = tools
-                result = message_client(**kwargs)
-                if current_messages is not messages:
-                    messages.clear()
-                    messages.extend(current_messages)
-                return result
-
-            except Exception as exc:
-                error_str = str(exc).lower()
-                is_overflow = ("context" in error_str or "token" in error_str)
-
-                if not is_overflow or attempt >= max_retries:
-                    raise
-
-                if attempt == 0:
-                    print_warn(
-                        "  [guard] Context overflow detected, "
-                        "truncating large tool results..."
-                    )
-                    current_messages = self._truncate_large_tool_results(
-                        current_messages
-                    )
-                elif attempt == 1:
-                    print_warn(
-                        "  [guard] Still overflowing, "
-                        "compacting conversation history..."
-                    )
-                    current_messages = self.compact_history(current_messages)
-
-        raise RuntimeError("guard_api_call: exhausted retries")
-
-
-    def guard_api_call_stream(
-        self,
-        system: str,
-        messages: list[dict],
-        tools: list[dict] | None = None,
-        max_retries: int = 1,
-    ):
-        current_messages = messages
-
-        for attempt in range(max_retries + 1):
-            try:
-                kwargs: dict[str, Any] = {
-                    "max_tokens": 8096,
-                    "system": system,
-                    "messages": current_messages,
-                }
-                if tools:
-                    kwargs["tools"] = tools
-
-                # 返回 stream 上下文管理器，由调用方用 with 语句消费
-                stream = message_client_stream(**kwargs)
-
-                if current_messages is not messages:
-                    messages.clear()
-                    messages.extend(current_messages)
-                return stream
-
-            except Exception as exc:
-                error_str = str(exc).lower()
-                is_overflow = ("context" in error_str or "token" in error_str)
-
-                if not is_overflow or attempt >= max_retries:
-                    raise
-
-                if attempt == 0:
-                    print_warn("  [guard] Context overflow, truncating large tool results...")
-                    current_messages = self._truncate_large_tool_results(current_messages)
-                elif attempt == 1:
-                    print_warn("  [guard] Still overflowing, compacting history...")
-                    current_messages = self.compact_history(current_messages)
-
-        raise RuntimeError("guard_api_call: exhausted retries")
-    
     async def async_guard_api_call(
         self,
         system: str,
@@ -354,7 +196,6 @@ class ContextGuard:
         max_retries: int = 1,
     ) -> Any:
         """
-        guard_api_call 的异步版本。
         三阶段重试:
           第0次尝试: 正常调用
           第1次尝试: 截断过大的工具结果
@@ -364,15 +205,12 @@ class ContextGuard:
 
         for attempt in range(max_retries + 1):
             try:
-                kwargs: dict[str, Any] = {
-                    "max_tokens": 8096,
-                    "system": system,
-                    "messages": current_messages,
-                }
-                if tools:
-                    kwargs["tools"] = tools
-
-                result = await async_message_client(**kwargs)
+                result = await self._provider.chat(
+                    messages=current_messages,
+                    system=system,
+                    tools=tools,
+                    max_tokens=8096,
+                )
 
                 if current_messages is not messages:
                     messages.clear()
@@ -397,6 +235,6 @@ class ContextGuard:
                         "  [guard] Still overflowing, "
                         "compacting conversation history..."
                     )
-                    current_messages = await self.async_compact_history(current_messages)
+                    current_messages = await self.compact_history(current_messages)
 
         raise RuntimeError("async_guard_api_call: exhausted retries")
