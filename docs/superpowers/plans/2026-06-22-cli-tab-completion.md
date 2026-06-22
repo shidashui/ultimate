@@ -1,3 +1,7 @@
+---
+archived-with: cli-tab-completion
+---
+
 # CLI Tab 补全 Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.

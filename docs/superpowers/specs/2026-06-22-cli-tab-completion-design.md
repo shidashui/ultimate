@@ -2,6 +2,8 @@
 comet_change: cli-tab-completion
 role: technical-design
 canonical_spec: openspec
+archived-with: cli-tab-completion
+status: implemented
 ---
 
 # CLI Tab 补全 — 技术设计
