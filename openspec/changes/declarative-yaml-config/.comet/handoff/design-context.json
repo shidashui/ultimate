@@ -4,10 +4,12 @@
   "mode": "compact",
   "canonical_spec": "openspec",
   "generated_by": "comet-handoff.sh",
-  "context_hash": "6be4b6db3829a47d7ff03e9907bc239fc6bb6c5a96dce37fd9cf5f8e959cc302",
+  "context_hash": "ac14788d44f470429e988b2aa1b4662bb4364c920f95b2ea0cfeaeee5cfa78b3",
   "files": [
     { "path": "openspec/changes/declarative-yaml-config/proposal.md", "sha256": "8d3b32d28927752a37b1509353b80c1bab56d0ce891cff56c50fdcb624243a19" },
     { "path": "openspec/changes/declarative-yaml-config/design.md", "sha256": "260a0d1edc4940f497f21159e4d10c3547a1f01d950d15bcb3aa74a6a807b908" },
-    { "path": "openspec/changes/declarative-yaml-config/tasks.md", "sha256": "d7b16d74de0790c6ad117f758794758dceccabbbf62607d74f2d48607fd2cb8c" }
+    { "path": "openspec/changes/declarative-yaml-config/tasks.md", "sha256": "d7b16d74de0790c6ad117f758794758dceccabbbf62607d74f2d48607fd2cb8c" },
+    { "path": "openspec/changes/declarative-yaml-config/specs/system-context/spec.md", "sha256": "1f58e5242696dbc1165a5cca0937809616289c0533f60ab2398032e977ab2da1" },
+    { "path": "openspec/changes/declarative-yaml-config/specs/yaml-config/spec.md", "sha256": "e34b7df9212407455f1d984cce195fdf3beb04b2f879f263323ad8425ae7d551" }
   ]
 }

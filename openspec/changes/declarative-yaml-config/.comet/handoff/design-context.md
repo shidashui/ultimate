@@ -3,7 +3,7 @@
 - Change: declarative-yaml-config
 - Phase: design
 - Mode: compact
-- Context hash: 6be4b6db3829a47d7ff03e9907bc239fc6bb6c5a96dce37fd9cf5f8e959cc302
+- Context hash: ac14788d44f470429e988b2aa1b4662bb4364c920f95b2ea0cfeaeee5cfa78b3
 
 Generated-by: comet-handoff.sh
 
@@ -160,5 +160,104 @@ agent:
 - [ ] Run `python ultimate.py` (or project entry point) to verify startup
 - [ ] Verify provider loads correctly: model name from config, API key from env var
 - [ ] Verify agent parameters: `max_iterations` and `context_safe_limit` from YAML
+```
+
+## openspec/changes/declarative-yaml-config/specs/system-context/spec.md
+
+- Source: openspec/changes/declarative-yaml-config/specs/system-context/spec.md
+- Lines: 1-20
+- SHA256: 1f58e5242696dbc1165a5cca0937809616289c0533f60ab2398032e977ab2da1
+
+```md
+# System Context — Delta: 配置源迁移
+
+## 变更说明
+
+`MAX_TOOL_ITERATIONS` 和 `CONTEXT_SAFE_LIMIT` 的配置源从 `config/configs.py` Python 常量迁移到 `config.yaml` 的 `agent` 段。
+
+## MODIFIED Requirements
+
+### SC-BUDGET: 迭代预算 (修改)
+
+- **SC-BUD-4**: 默认上限 `MAX_TOOL_ITERATIONS = 30`，通过 `config.yaml` 的 `agent.max_iterations` 配置（原通过 `config/configs.py` 配置）
+
+### SC-PREFLIGHT: 预飞上下文压缩 (修改)
+
+- **SC-PF-2**: 阈值从 `max_tokens * 0.8` 调整：`ContextGuard.max_tokens` 默认值来自 `config.yaml` 的 `agent.context_safe_limit`（原通过 `config/configs.py` 的 `CONTEXT_SAFE_LIMIT` 常量）
+
+## 验收场景（更新）
+
+1. **配置驱动**: `config.yaml` `agent.max_iterations: 20` → AgentRunner 预算上限为 20
+2. **配置驱动**: `config.yaml` `agent.context_safe_limit: 100000` → ContextGuard 阈值为 100000 * 0.8
+```
+
+## openspec/changes/declarative-yaml-config/specs/yaml-config/spec.md
+
+- Source: openspec/changes/declarative-yaml-config/specs/yaml-config/spec.md
+- Lines: 1-61
+- SHA256: e34b7df9212407455f1d984cce195fdf3beb04b2f879f263323ad8425ae7d551
+
+```md
+# YAML Config — 声明式配置系统
+
+## ADDED Requirements
+
+### YC-LOAD: 配置加载
+
+- **YC-LOAD-1**: `load_config(path)` 从 YAML 文件读取配置，返回 `Config` dataclass 实例
+- **YC-LOAD-2**: 文件缺失时打印 "Copy config.example.yaml to config.yaml and edit." 并 exit(1)
+- **YC-LOAD-3**: YAML 语法错误时打印行号和具体错误信息，exit(1)
+- **YC-LOAD-4**: 必填字段缺失时打印字段完整路径（如 `model.default`），exit(1)
+- **YC-LOAD-5**: 默认从项目根目录加载 `config.yaml`，`WORKDIR` 定位
+
+### YC-MODEL: Model 配置段
+
+- **YC-MODEL-1**: `model.default` 指定当前使用的 provider name
+- **YC-MODEL-2**: `model.providers` 为 provider 列表，每项含 `name`、`base_url`、`api_key_env`
+- **YC-MODEL-3**: 启动时从 `os.environ[provider.api_key_env]` 读取 API key，注入 `provider.api_key`
+- **YC-MODEL-4**: `model.default` 指定的 provider 不在 providers 列表中时报错
+- **YC-MODEL-5**: `api_key_env` 环境变量未设置时打印 "[NAME]_API_KEY not set. Please export it." 并 exit(1)
+
+### YC-AGENT: Agent 配置段
+
+- **YC-AGENT-1**: `agent.max_iterations` 控制工具调用上限，默认 30
+- **YC-AGENT-2**: `agent.context_safe_limit` 控制上下文安全阈值，默认 180000
+- **YC-AGENT-3**: `agent.max_tool_output` 控制单个工具输出最大字符数，默认 50000
+
+### YC-TOOLSETS: Toolsets 配置段
+
+- **YC-TOOL-1**: `toolsets.enabled` 列出启用的工具集
+- **YC-TOOL-2**: `toolsets.disabled` 列出禁用的工具集
+
+### YC-WORKSPACE: Workspace 配置段
+
+- **YC-WS-1**: `workspace.bootstrap_files` 控制启动时加载的 Bootstrap 文件列表
+- **YC-WS-2**: `workspace.max_file_chars` 控制单文件最大字符数
+- **YC-WS-3**: `workspace.max_total_chars` 控制 Bootstrap 文件总字符上限
+
+### YC-SKILLS: Skills 配置段
+
+- **YC-SK-1**: `skills.max_skills` 控制最大技能数
+- **YC-SK-2**: `skills.max_skills_prompt` 控制技能提示词最大长度
+
+### YC-TEMPLATE: 模板文件
+
+- **YC-TPL-1**: 提供 `config.example.yaml` 作为用户模板，包含所有默认值
+- **YC-TPL-2**: `config.example.yaml` 不含 secrets，可安全提交到 git
+- **YC-TPL-3**: `config.yaml` 加入 `.gitignore`
+
+### YC-COMPAT: 向后兼容
+
+- **YC-CMP-1**: 模块级别保留旧常量名作为 `config` 对象属性别名（`WORKDIR`、`CONTEXT_SAFE_LIMIT`、`MAX_TOOL_ITERATIONS` 等）
+- **YC-CMP-2**: 现有 `from config.configs import ...` 语句继续有效
+
+## 验收场景
+
+1. **正常加载**: `config.yaml` 存在且格式正确 → `load_config()` 返回完整 Config 对象
+2. **缺失文件**: `config.yaml` 不存在 → 打印模板提示 → exit(1)
+3. **缺失环境变量**: `api_key_env` 指定的环境变量未设置 → 打印变量名 → exit(1)
+4. **default 不匹配**: `model.default` 指向不存在的 provider → 打印错误 → exit(1)
+5. **YAML 语法错误**: 缩进或格式错误 → 打印行号 + 错误 → exit(1)
+6. **模板可用**: `cp config.example.yaml config.yaml` → 填写 api_key_env 对应环境变量 → 正常启动
 ```
 
