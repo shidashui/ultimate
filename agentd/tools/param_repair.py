@@ -49,6 +49,13 @@ def _coerce(value: Any, target_type: str) -> tuple[Any, str | None]:
         # fall through to abort below
 
     try:
+        # int("5.0") 会失败, 先 float 再 int
+        if py_type is int and isinstance(value, str):
+            try:
+                coerced = int(float(value))
+            except (ValueError, TypeError):
+                raise  # 重新抛出让外层 catch 处理
+            return coerced, f"coerced str → int ({value!r} → {coerced})"
         coerced = py_type(value)
         return coerced, f"coerced {type(value).__name__} → {py_type.__name__} ({value!r} → {coerced!r})"
     except (ValueError, TypeError):
@@ -99,6 +106,10 @@ def validate_and_repair(
             continue
         target_type = schema[key].get("type", "string")
         coerced, warn = _coerce(value, target_type)
+        if warn and "cannot coerce" in warn:
+            # coercion failure → hard error, repair impossible
+            errors.append(f"param '{key}': {warn}")
+            continue
         repaired[key] = coerced
         if warn:
             warnings.append(f"param '{key}': {warn}")
@@ -111,7 +122,8 @@ def validate_and_repair(
                 warnings.append(
                     f"param '{key}': filled default {handler_defaults[key]!r}"
                 )
-            else:
+            elif handler is not None:
+                # handler 存在但参数无默认值 → 必填参数缺失
                 errors.append(f"missing required param '{key}'")
 
     # ── 3. 校验必填参数值非空 ──
