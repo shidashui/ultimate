@@ -1,0 +1,19 @@
+workflow: full
+phase: build
+build_mode: executing-plans
+build_pause: null
+isolation: branch
+verify_mode: null
+base_ref: e30194df1b8d5a20da328c70a661e0a15819f89b
+design_doc: docs/superpowers/specs/2026-06-23-voice-platform-refactor-design.md
+plan: docs/superpowers/plans/2026-06-23-voice-platform-refactor.md
+verify_result: pending
+verification_report: null
+branch_status: pending
+created_at: 2026-06-23
+verified_at: null
+archived: false
+build_command: python -c "import agentd; from platforms.voice import VoicePlatform; from config.configs import get_config; print('Build OK')"
+verify_command: python -m pytest tests/ -q
+handoff_context: openspec/changes/voice-platform-refactor/.comet/handoff/design-context.json
+handoff_hash: 93264e38c97abd6070d0f812b3df55200479b9bff5e52755139f8e782d4fb9f7
