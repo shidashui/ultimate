@@ -1,0 +1,16 @@
+{
+  "change": "tool-security-sandbox",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "4123389bfd394235a493d4c5c086cd922874c514a0bfec07c4c5581302e76400",
+  "files": [
+    { "path": "openspec/changes/tool-security-sandbox/proposal.md", "sha256": "f86835f97c9f611067763e252810a6cad81951f16b835268d146582aa66c4ff5" },
+    { "path": "openspec/changes/tool-security-sandbox/design.md", "sha256": "983ccc8e6cff7a4834dc30da9f5b56805a8eb46f95c10c30dc0a35b231580c6f" },
+    { "path": "openspec/changes/tool-security-sandbox/tasks.md", "sha256": "b9ae77bf97d2a85b81a440d630c5d80f1716a7f697802bfced5b560a75e14379" },
+    { "path": "openspec/changes/tool-security-sandbox/specs/audit-log/spec.md", "sha256": "c203b429d2f097457319b97ac54d10aa1c463edf03ecb14513e11e683ad1a2ce" },
+    { "path": "openspec/changes/tool-security-sandbox/specs/env-isolation/spec.md", "sha256": "daa657234048c5a876c8d5ec4182488e574ba739f61d544222ebcebfd102667c" },
+    { "path": "openspec/changes/tool-security-sandbox/specs/tool-sandbox/spec.md", "sha256": "ddad7d9c39f866f2cc5e25a5e1a690ef018254626904e06af824bcc62c4befdc" }
+  ]
+}

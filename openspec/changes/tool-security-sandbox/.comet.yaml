@@ -1,9 +1,9 @@
 workflow: full
-phase: build
+phase: verify
 build_mode: executing-plans
 build_pause: null
 isolation: branch
-verify_mode: null
+verify_mode: full
 base_ref: 1a4761c9eac78d58632b4bf27c733a2d6179df76
 design_doc: docs/superpowers/specs/2026-06-23-tool-security-sandbox-design.md
 plan: docs/superpowers/plans/2026-06-23-tool-security-sandbox.md
