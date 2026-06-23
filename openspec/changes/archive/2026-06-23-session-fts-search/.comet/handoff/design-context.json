@@ -1,0 +1,14 @@
+{
+  "change": "session-fts-search",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "c33079ea89fccc05cd419cce6e91b00e1e520ddabe2b8af924d8b5ec106673e2",
+  "files": [
+    { "path": "openspec/changes/session-fts-search/proposal.md", "sha256": "1ca692aa9b132ab5167dcbe5bd6f713f00066f7298f01c460e86a6932b2ec57e" },
+    { "path": "openspec/changes/session-fts-search/design.md", "sha256": "da0da592f9e092dc7ec1926a97d8a6471242fdbdd52f92da9f1d08a6c5d36d4c" },
+    { "path": "openspec/changes/session-fts-search/tasks.md", "sha256": "b9bfb946c21f42349a28813521d12cc06b8cc549d98fdf0cb97f5300ab927bc4" },
+    { "path": "openspec/changes/session-fts-search/specs/session-fts/spec.md", "sha256": "f349a6497085fbff9d896645316289610afe50991225c5d773dc143826c18f2a" }
+  ]
+}
