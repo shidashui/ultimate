@@ -1,0 +1,52 @@
+# ultimate agent — 声明式配置
+# 从 config.example.yaml 复制并填写你的配置
+
+# ── Model: LLM provider 配置 ──────────────────────────────────
+model:
+  default: deepseek
+  providers:
+    - name: deepseek
+      model: deepseek-v4-flash
+      base_url: https://api.deepseek.com/anthropic
+      api_key: "sk-283d814ecac64e0c93d196f88327d69f"  # 可选，优先级低于 api_key_env
+      api_key_env: DEEPSEEK_API_KEY
+
+# ── Toolsets: 工具集开关 ─────────────────────────────────────
+toolsets:
+  enabled: [memory, file, browser, skill]
+  disabled: []
+
+# ── Agent: 运行时参数 ─────────────────────────────────────────
+agent:
+  max_iterations: 30
+  context_safe_limit: 180000
+  max_tool_output: 50000
+
+# ── Workspace: 工作区与 Bootstrap ─────────────────────────────
+workspace:
+  bootstrap_files:
+    - SOUL.md
+    - IDENTITY.md
+    - TOOLS.md
+    - USER.md
+    - HEARTBEAT.md
+    - BOOTSTRAP.md
+    - AGENTS.md
+    - MEMORY.md
+  max_file_chars: 20000
+  max_total_chars: 150000
+
+# ── Skills: 技能系统 ──────────────────────────────────────────
+skills:
+  max_skills: 150
+  max_skills_prompt: 30000
+
+# ── Voice: voice platform parameters ────────────────────────────────
+voice:
+  model: small
+  vad: silero
+  vad_threshold: 0.5
+  wake_word: "你好"
+  sample_rate: 16000
+  max_record_secs: 30
+  tts_voice: zh-CN-XiaoxiaoNeural

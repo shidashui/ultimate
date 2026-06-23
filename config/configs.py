@@ -62,12 +62,24 @@ class SkillsConfig:
 
 
 @dataclass
+class VoiceConfig:
+    model: str = "small"
+    vad: str = "silero"
+    vad_threshold: float = 0.5
+    wake_word: str = "你好"
+    sample_rate: int = 16000
+    max_record_secs: int = 30
+    tts_voice: str = "zh-CN-XiaoxiaoNeural"
+
+
+@dataclass
 class Config:
     model: ModelConfig
     toolsets: ToolsetsConfig
     agent: AgentConfig
     workspace: WorkspaceConfig
     skills: SkillsConfig
+    voice: VoiceConfig
     workdir: Path
     workspace_dir: Path
 
@@ -195,6 +207,18 @@ def load_config(path: str | Path | None = None) -> Config:
         max_skills_prompt=sk_raw.get("max_skills_prompt", 30000),
     )
 
+    # Parse voice
+    voice_raw = raw.get("voice", {})
+    voice = VoiceConfig(
+        model=voice_raw.get("model", "small"),
+        vad=voice_raw.get("vad", "silero"),
+        vad_threshold=float(voice_raw.get("vad_threshold", 0.5)),
+        wake_word=voice_raw.get("wake_word", "你好"),
+        sample_rate=int(voice_raw.get("sample_rate", 16000)),
+        max_record_secs=int(voice_raw.get("max_record_secs", 30)),
+        tts_voice=voice_raw.get("tts_voice", "zh-CN-XiaoxiaoNeural"),
+    )
+
     workdir = config_path.parent
     workspace_dir = workdir / "workspace"
 
@@ -204,6 +228,7 @@ def load_config(path: str | Path | None = None) -> Config:
         agent=agent,
         workspace=workspace,
         skills=skills,
+        voice=voice,
         workdir=workdir,
         workspace_dir=workspace_dir,
     )
@@ -243,6 +268,7 @@ _ALIAS_MAP: dict[str, callable] = {
     "MAX_TOTAL_CHARS": lambda: get_config().workspace.max_total_chars,
     "MAX_SKILLS": lambda: get_config().skills.max_skills,
     "MAX_SKILLS_PROMPT": lambda: get_config().skills.max_skills_prompt,
+    "VOICE_CONFIG": lambda: get_config().voice,
 }
 
 
