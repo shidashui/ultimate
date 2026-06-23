@@ -11,6 +11,8 @@ from agentd.agent.budget import IterationBudget
 from agentd.providers.base import ErrorType, ProviderError
 from config.configs import MAX_TOOL_ITERATIONS
 from agentd.tools.param_repair import validate_and_repair
+from agentd.tools.audit import AuditRecord, AuditLogger
+import time as _time
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +54,11 @@ class AgentRunner:
         if handler is None:
             return f"Error: Unknown tool '{tool_name}'"
 
+        # ── 审计：入口 ──
+        t_start = _time.perf_counter()
+        audit_warnings: list[str] = []
+        blocked = False
+
         # ── 参数校验 + 自动修复 ──
         schema = self.container.tools_schemas.get(tool_name)
         if schema:
@@ -59,16 +66,52 @@ class AgentRunner:
             for w in warnings:
                 logger.warning("[param-repair] %s: %s (original=%s)", tool_name, w, repr(tool_input))
             if not repaired and warnings:
-                return f"Error: Invalid arguments for {tool_name}: {'; '.join(warnings)}"
+                blocked = True
+                result = f"Error: Invalid arguments for {tool_name}: {'; '.join(warnings)}"
+                # ── 审计：出口（参数错误）──
+                self._audit_log(tool_name, tool_input, result, t_start, audit_warnings, blocked)
+                return result
             tool_input = repaired
+            # Track repair warnings for audit
+            audit_warnings.extend(w for w in warnings if "cannot coerce" not in w)
 
         # ── 安全网（repair 之后不太可能触发，但保留作为兜底）──
         try:
-            return handler(**tool_input)
+            result = handler(**tool_input)
         except TypeError as exc:
-            return f"Error: Invalid arguments for {tool_name}: {exc}"
+            result = f"Error: Invalid arguments for {tool_name}: {exc}"
         except Exception as exc:
-            return f"Error: {tool_name} failed: {exc}"
+            result = f"Error: {tool_name} failed: {exc}"
+
+        # Check if this was a blocked call (result starts with "Error: Blocked:")
+        if result.startswith("Error: Blocked:"):
+            blocked = True
+
+        # ── 审计：出口 ──
+        self._audit_log(tool_name, tool_input, result, t_start, audit_warnings, blocked)
+        return result
+
+    def _audit_log(
+        self, tool_name: str, tool_input: dict, result: str,
+        t_start: float, warnings: list[str], blocked: bool,
+    ) -> None:
+        """Record audit log entry. Never throws."""
+        try:
+            audit: AuditLogger = self.container.get("audit_logger")
+            if audit is None:
+                return
+            duration_ms = (_time.perf_counter() - t_start) * 1000
+            result_summary = result[:200] if result else ""
+            audit.log(AuditRecord(
+                tool_name=tool_name,
+                params=tool_input,
+                result_summary=result_summary,
+                duration_ms=duration_ms,
+                warnings=warnings,
+                blocked=blocked,
+            ))
+        except Exception:
+            pass  # audit failure must not affect tool execution
 
     # ── 公共序列化逻辑 ────────────────────────────
     @staticmethod

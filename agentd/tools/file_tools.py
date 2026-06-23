@@ -4,6 +4,8 @@ from utils.print_tools import print_tool
 from utils.path_tools import safe_path
 from typing import Any
 from config.configs import MAX_TOOL_OUTPUT, WORKDIR
+from agentd.bootstrap.context import get_current_container
+from agentd.tools.sandbox import SandboxBlockedError
 
 def truncate(text: str, limit: int = MAX_TOOL_OUTPUT) -> str:
     """截断过长的输出, 并附上提示."""
@@ -21,21 +23,24 @@ def truncate(text: str, limit: int = MAX_TOOL_OUTPUT) -> str:
 
 def tool_bash(command: str, timeout: int = 30) -> str:
     """执行 shell 命令并返回输出."""
-    # 基础安全检查: 拒绝明显危险的命令
-    dangerous = ["rm -rf /", "mkfs", "> /dev/sd", "dd if="]
-    for pattern in dangerous:
-        if pattern in command:
-            return f"Error: Refused to run dangerous command containing '{pattern}'"
-
     print_tool("bash", command)
+
+    try:
+        sandbox = get_current_container().sandbox
+        safe_command, safe_env, warnings, extra_kwargs = sandbox.sanitize(command)
+    except SandboxBlockedError as exc:
+        return f"Error: Blocked: {exc}"
+
     try:
         result = subprocess.run(
-            command,
+            safe_command,
             shell=True,
             capture_output=True,
             text=True,
             timeout=timeout,
             cwd=str(WORKDIR),
+            env=safe_env,
+            **extra_kwargs,
         )
         output = ""
         if result.stdout:
@@ -58,31 +63,25 @@ def tool_cmd(command: str, timeout: int = 30) -> str:
     if sys.platform != "win32":
         return "Error: 'cmd' tool is only available on Windows. Use 'bash' on Unix-like systems."
 
-    # Windows特定的危险命令检查
-    dangerous = [
-        "format c:", "format d:", "format e:", "format f:",
-        "del /f /s /q", "rd /s /q", "rmdir /s /q",
-        "wmic diskdrive", "diskpart", "bcdedit",
-        "reg delete", "reg add", "netsh",
-        "taskkill /f /im", "shutdown", "powercfg",
-        "chkdsk /f", "sfc /scannow", "dism"
-    ]
-
-    for pattern in dangerous:
-        if pattern.lower() in command.lower():
-            return f"Error: Refused to run dangerous command containing '{pattern}'"
-
     print_tool("cmd", command)
+
     try:
-        # 在Windows上使用cmd.exe执行命令
+        sandbox = get_current_container().sandbox
+        safe_command, safe_env, warnings, extra_kwargs = sandbox.sanitize(command)
+    except SandboxBlockedError as exc:
+        return f"Error: Blocked: {exc}"
+
+    try:
         result = subprocess.run(
-            command,
+            safe_command,
             shell=True,
             capture_output=True,
             text=True,
             encoding="cp936",  # Windows中文编码
             timeout=timeout,
             cwd=str(WORKDIR),
+            env=safe_env,
+            **extra_kwargs,
         )
         output = ""
         if result.stdout:

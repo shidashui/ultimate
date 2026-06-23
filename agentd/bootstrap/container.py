@@ -5,6 +5,9 @@ from agentd.memory.memory import MemoryStore
 from agentd.context.session import SessionStore
 from agentd.context.context import ContextGuard
 from agentd.tools.tool_handlers import get_tools, get_tool_handlers
+from agentd.tools.sandbox import Sandbox
+from agentd.tools.audit import AuditLogger
+from config.configs import WORKDIR
 
 class Container:
     def __init__(self, session_id: str | None = None):
@@ -19,6 +22,11 @@ class Container:
     def tools_schemas(self) -> dict:
         """{tool_name: {param: {type, description}}} — 供 param_repair 做类型强转。"""
         return {t["name"]: t["input_schema"]["properties"] for t in self.tools}
+
+    @property
+    def sandbox(self) -> Sandbox:
+        """Command execution sandbox (L1-L4). Convenience accessor."""
+        return self.get("sandbox")
 
     def register(self, name, instance):
         self.services[name] = instance
@@ -52,6 +60,16 @@ class Container:
         self.register("session_db", session_db)
         self.register("guard", guard)
         self.register("provider_router", provider_router)
+
+        # Sandbox + AuditLogger
+        sandbox = Sandbox(workdir=WORKDIR)
+        audit_log_dir = WORKDIR / "logs" / "audit"
+        audit_logger = AuditLogger(
+            log_dir=audit_log_dir,
+            session_id=self.session_id or "unknown",
+        )
+        self.register("sandbox", sandbox)
+        self.register("audit_logger", audit_logger)
 
         self.tools = get_tools()
         self.tools_handlers = get_tool_handlers()
