@@ -1,9 +1,9 @@
 workflow: full
-phase: build
+phase: verify
 build_mode: executing-plans
 build_pause: null
 isolation: branch
-verify_mode: null
+verify_mode: full
 base_ref: e30194df1b8d5a20da328c70a661e0a15819f89b
 design_doc: docs/superpowers/specs/2026-06-23-voice-platform-refactor-design.md
 plan: docs/superpowers/plans/2026-06-23-voice-platform-refactor.md

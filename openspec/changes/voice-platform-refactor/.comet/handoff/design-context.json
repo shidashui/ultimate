@@ -1,0 +1,15 @@
+{
+  "change": "voice-platform-refactor",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "93264e38c97abd6070d0f812b3df55200479b9bff5e52755139f8e782d4fb9f7",
+  "files": [
+    { "path": "openspec/changes/voice-platform-refactor/proposal.md", "sha256": "0295a983bc1c0367812188ed7a55b43d4268cec95583b8c739bc29a3f4742ca7" },
+    { "path": "openspec/changes/voice-platform-refactor/design.md", "sha256": "fef64bcd935582a19c6350b3ec218570f3b1c0c98b26051eca6b1d3346cac852" },
+    { "path": "openspec/changes/voice-platform-refactor/tasks.md", "sha256": "bff52a652d3a79997a4c24bf6f90e84672b6ae4146961dc1aa1dadc6b544a925" },
+    { "path": "openspec/changes/voice-platform-refactor/specs/voice-core/spec.md", "sha256": "7005480108e7cc498f2ba600bf5d37f737e48a0ed7dee79c81015717de2fb80b" },
+    { "path": "openspec/changes/voice-platform-refactor/specs/voice-tts-edge/spec.md", "sha256": "4b763ac552ec76e9eb6ab7bc9d64443627d134d72d9fdfecf62d5e262dbfd8c2" }
+  ]
+}
