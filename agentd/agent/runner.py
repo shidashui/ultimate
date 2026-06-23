@@ -8,6 +8,7 @@ from agentd.memory.memory import MemoryStore
 from agentd.skill.skill import SkillsManager
 from agentd.prompt.prompts import build_system_prompt
 from agentd.agent.budget import IterationBudget
+from agentd.providers.base import ErrorType, ProviderError
 from config.configs import MAX_TOOL_ITERATIONS
 
 logger = logging.getLogger(__name__)
@@ -90,6 +91,11 @@ class AgentRunner:
 
         CLI 端通过 asyncio.run() 调用，Gateway 端直接 await。
         """
+        # 0. 重置 provider 到主（每 turn 重新开始）
+        provider_router = self.container.get("provider_router")
+        if provider_router:
+            provider_router.reset()
+
         # 1. 记忆召回
         memory_context = self.memory_store._auto_recall(user_input)
 
@@ -130,6 +136,20 @@ class AgentRunner:
                     tools=self.container.tools,
                 )
                 last_response = response
+            except ProviderError as exc:
+                # 不可恢复错误 — 明确报错给用户
+                if exc.error_type in (ErrorType.AUTH_FAILURE,
+                                       ErrorType.MODEL_UNAVAILABLE):
+                    logger.error("[Runner] 不可恢复错误: %s (type=%s)",
+                                 exc, exc.error_type.value)
+                    self._rollback(messages)
+                    return (f"抱歉，服务暂时不可用。\n"
+                            f"  原因: {exc}\n"
+                            f"  请检查 API Key 配置或稍后重试。")
+                # 可恢复但已耗尽重试
+                logger.exception("[Runner] LLM 调用失败 (重试耗尽): %s", exc)
+                self._rollback(messages)
+                return ""
             except Exception as exc:
                 logger.exception("[Runner] LLM 调用异常: %s", exc)
                 self._rollback(messages)
