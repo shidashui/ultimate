@@ -1,0 +1,13 @@
+{
+  "change": "tool-call-param-repair",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "be40d63b552b436a95621a2aa95bad72c8c50ac49b1e211e229097729d82c023",
+  "files": [
+    { "path": "openspec/changes/tool-call-param-repair/proposal.md", "sha256": "79ddce19f58c751dbe8fcc35ec52e400a90f243dee8dfd2e0d41cd279d43b348" },
+    { "path": "openspec/changes/tool-call-param-repair/design.md", "sha256": "f2ccc456dfe9f6b2128fd77101f80d06e3e7e6a60afabec9509f38c1faa9bb97" },
+    { "path": "openspec/changes/tool-call-param-repair/tasks.md", "sha256": "306a569d7b2ca509d3fa91d969dacdd572698839b90a3d5d6ecd9131e501b1fd" }
+  ]
+}

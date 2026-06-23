@@ -1,5 +1,5 @@
 workflow: full
-phase: build
+phase: archive
 build_mode: executing-plans
 build_pause: null
 isolation: branch
@@ -9,11 +9,11 @@ verify_mode: null
 base_ref: 1fce7004d7c20ebc7aa734f67652a6f26a46b6f0
 design_doc: docs/superpowers/specs/2026-06-23-tool-call-param-repair-design.md
 plan: docs/superpowers/plans/2026-06-23-tool-call-param-repair.md
-verify_result: pending
-verification_report: null
-branch_status: pending
+verify_result: pass
+verification_report: docs/superpowers/reports/2026-06-23-tool-call-param-repair-verify.md
+branch_status: handled
 created_at: 2026-06-23
-verified_at: null
-archived: false
+verified_at: 2026-06-23
+archived: true
 handoff_context: openspec/changes/tool-call-param-repair/.comet/handoff/design-context.json
 handoff_hash: be40d63b552b436a95621a2aa95bad72c8c50ac49b1e211e229097729d82c023
