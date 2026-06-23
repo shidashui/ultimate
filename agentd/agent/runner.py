@@ -10,6 +10,7 @@ from agentd.prompt.prompts import build_system_prompt
 from agentd.agent.budget import IterationBudget
 from agentd.providers.base import ErrorType, ProviderError
 from config.configs import MAX_TOOL_ITERATIONS
+from agentd.tools.param_repair import validate_and_repair
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +51,18 @@ class AgentRunner:
         handler = self.container.tools_handlers.get(tool_name)
         if handler is None:
             return f"Error: Unknown tool '{tool_name}'"
+
+        # ── 参数校验 + 自动修复 ──
+        schema = self.container.tools_schemas.get(tool_name)
+        if schema:
+            repaired, warnings = validate_and_repair(tool_input, schema, handler)
+            for w in warnings:
+                logger.warning("[param-repair] %s: %s (original=%s)", tool_name, w, repr(tool_input))
+            if not repaired and warnings:
+                return f"Error: Invalid arguments for {tool_name}: {'; '.join(warnings)}"
+            tool_input = repaired
+
+        # ── 安全网（repair 之后不太可能触发，但保留作为兜底）──
         try:
             return handler(**tool_input)
         except TypeError as exc:
