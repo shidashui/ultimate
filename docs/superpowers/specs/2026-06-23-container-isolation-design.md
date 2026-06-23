@@ -2,6 +2,8 @@
 comet_change: container-isolation
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-06-23-container-isolation
+status: final
 ---
 
 # Per-Session Container Isolation — 技术设计

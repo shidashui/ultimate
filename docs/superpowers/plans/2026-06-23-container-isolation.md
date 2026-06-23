@@ -2,6 +2,7 @@
 change: container-isolation
 design-doc: docs/superpowers/specs/2026-06-23-container-isolation-design.md
 base-ref: d2199f118159cd179ba965d4df9784b8bbc934ad
+archived-with: 2026-06-23-container-isolation
 ---
 
 # Per-Session Container Isolation 实施方案
@@ -23,6 +24,7 @@ base-ref: d2199f118159cd179ba965d4df9784b8bbc934ad
 - 现有 56 个测试保持通过
 - 每次提交格式：`feat: <简述>`，Co-Authored-By: Claude <noreply@anthropic.com>
 
+archived-with: 2026-06-23-container-isolation
 ---
 
 ### Task 1: 新建 ContextVar 模块
@@ -90,6 +92,7 @@ get_current_container() for per-session container isolation.
 Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
+archived-with: 2026-06-23-container-isolation
 ---
 
 ### Task 2: Container 改造 — 移除全局单例
@@ -143,6 +146,7 @@ Removed module-level 'container = Container()' singleton.
 Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
+archived-with: 2026-06-23-container-isolation
 ---
 
 ### Task 3: 更新 bootstrap __init__.py 导出
@@ -179,6 +183,7 @@ get_current_container contextvar helpers. Container class still exported.
 Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
+archived-with: 2026-06-23-container-isolation
 ---
 
 ### Task 4: AgentRunner per-session Container
@@ -272,6 +277,7 @@ importing a global singleton. run_turn() sets/clears ContextVar.
 Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
+archived-with: 2026-06-23-container-isolation
 ---
 
 ### Task 5: 工具函数适配 ContextVar
@@ -338,6 +344,7 @@ instead of importing the global container singleton.
 Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
+archived-with: 2026-06-23-container-isolation
 ---
 
 ### Task 6: CLI 适配
@@ -404,6 +411,7 @@ CLI no longer accesses runner.container directly.
 Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
+archived-with: 2026-06-23-container-isolation
 ---
 
 ### Task 7: 测试 + 回归
