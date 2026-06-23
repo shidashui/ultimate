@@ -6,7 +6,6 @@ import os
 import collections
 import numpy as np
 import sounddevice as sd
-import pyttsx3
 import webrtcvad
 from scipy.io.wavfile import write as wav_write
 from faster_whisper import WhisperModel
@@ -197,13 +196,29 @@ class VoicePlatform(BasePlatform):
             os.unlink(tmp)
 
     # ------------------------------------------------------------------ #
-    #  语音合成                                                             #
+    #  TTS                                                               #
     # ------------------------------------------------------------------ #
 
     async def _speak(self, text: str) -> None:
         self._speaking = True
         try:
-            await asyncio.get_event_loop().run_in_executor(None, _speak_sync, text)
+            import io
+            import edge_tts
+
+            voice = "zh-CN-XiaoxiaoNeural"
+            communicate = edge_tts.Communicate(text, voice)
+            mp3_data = io.BytesIO()
+            async for chunk in communicate.stream():
+                if chunk["type"] == "audio":
+                    mp3_data.write(chunk["data"])
+            mp3_bytes = mp3_data.getvalue()
+
+            if mp3_bytes:
+                await asyncio.get_event_loop().run_in_executor(
+                    None, _play_mp3_sync, mp3_bytes
+                )
+        except Exception as e:
+            logger.error(f"TTS error: {e}")
         finally:
             self._speaking = False
 
@@ -212,13 +227,11 @@ class VoicePlatform(BasePlatform):
 #  工具函数                                                             #
 # ------------------------------------------------------------------ #
 
-def _speak_sync(text: str) -> None:
-    engine = pyttsx3.init()
-    for voice in engine.getProperty("voices"):
-        if "huihui" in voice.name.lower() or "zh" in voice.id.lower():
-            engine.setProperty("voice", voice.id)
-            break
-    engine.setProperty("rate", 180)
-    engine.say(text)
-    engine.runAndWait()
-    engine.stop()
+def _play_mp3_sync(mp3_bytes: bytes) -> None:
+    """Decode MP3 bytes and play via sounddevice (runs in executor)."""
+    import io
+    import soundfile as sf
+
+    audio, sr = sf.read(io.BytesIO(mp3_bytes))
+    sd.play(audio, sr)
+    sd.wait()
