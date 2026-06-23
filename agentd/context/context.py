@@ -1,7 +1,10 @@
+import asyncio
 import json
 from typing import Any
 from config.configs import CONTEXT_SAFE_LIMIT
 from utils.print_tools import print_session, print_warn
+from agentd.providers.base import ErrorType, ProviderError
+from agentd.providers.error_mapper import classify
 
 
 def _serialize_messages_for_summary(messages: list[dict]) -> str:
@@ -47,14 +50,25 @@ class ContextGuard:
 
     PREFLIGHT_RATIO = 0.8  # 80% 阈值触发预飞压缩
 
-    def __init__(self, max_tokens: int = CONTEXT_SAFE_LIMIT, provider=None):
+    def __init__(self, max_tokens: int = CONTEXT_SAFE_LIMIT, provider=None,
+                 provider_router=None):
         self.max_tokens = max_tokens
-        self._provider = provider
+        self._provider = provider  # backward compat
+        self._router = provider_router  # new: ProviderRouter
+
+    def _get_provider(self):
+        """返回当前活跃的 provider（优先 router，回退到单 provider）。"""
+        if self._router is not None:
+            return self._router.current
+        if self._provider is not None:
+            return self._provider
+        raise RuntimeError("No provider configured")
 
     def estimate_tokens(self, text: str) -> int:
-        if self._provider is not None:
-            return self._provider.estimate_tokens(text)
-        return len(text) // 4
+        try:
+            return self._get_provider().estimate_tokens(text)
+        except RuntimeError:
+            return len(text) // 4
 
     def estimate_messages_tokens(self, messages: list[dict]) -> int:
         total = 0
@@ -139,7 +153,7 @@ class ContextGuard:
         )
 
         try:
-            summary_resp = await self._provider.chat(
+            summary_resp = await self._get_provider().chat(
                 messages=[{"role": "user", "content": summary_prompt}],
                 system="You are a conversation summarizer. Be concise and factual.",
                 max_tokens=2048,
@@ -193,23 +207,33 @@ class ContextGuard:
         system: str,
         messages: list[dict],
         tools: list[dict] | None = None,
-        max_retries: int = 1,
     ) -> Any:
         """
-        三阶段重试:
-          第0次尝试: 正常调用
-          第1次尝试: 截断过大的工具结果
-          第2次尝试: 通过 LLM 摘要压缩历史
+        类型化错误重试调度:
+
+          CONTEXT_OVERFLOW  → 截断工具结果 → 压缩历史 → 抛出
+          RATE_LIMIT        → 指数退避 (1s, 2s, 4s) → 抛出
+          AUTH_FAILURE      → 切换 provider → 重试 / 抛出
+          SERVER_ERROR      → 线性退避 (2s, 4s) → 抛出
+          TIMEOUT           → 增加超时 (30→60→120s) → 抛出
+          MODEL_UNAVAILABLE → 切换 provider → 重试 / 抛出
+          UNKNOWN           → 立即抛出，不重试
         """
         current_messages = messages
+        timeout_s = 30
 
-        for attempt in range(max_retries + 1):
+        # 上下文溢出专用的两次重试计数器（与其他错误类型独立）
+        overflow_attempt = 0
+
+        for attempt in range(5):  # 安全上限: 总重试不超过 5 次
+            provider = self._get_provider()
             try:
-                result = await self._provider.chat(
+                result = await provider.chat(
                     messages=current_messages,
                     system=system,
                     tools=tools,
                     max_tokens=8096,
+                    timeout=timeout_s,
                 )
 
                 if current_messages is not messages:
@@ -218,23 +242,80 @@ class ContextGuard:
                 return result
 
             except Exception as exc:
-                error_str = str(exc).lower()
-                is_overflow = ("context" in error_str or "token" in error_str)
+                err = classify(exc)
 
-                if not is_overflow or attempt >= max_retries:
-                    raise
+                match err.error_type:
 
-                if attempt == 0:
-                    print_warn(
-                        "  [guard] Context overflow detected, "
-                        "truncating large tool results..."
-                    )
-                    current_messages = self._truncate_large_tool_results(current_messages)
-                elif attempt == 1:
-                    print_warn(
-                        "  [guard] Still overflowing, "
-                        "compacting conversation history..."
-                    )
-                    current_messages = await self.compact_history(current_messages)
+                    case ErrorType.CONTEXT_OVERFLOW:
+                        if overflow_attempt == 0:
+                            print_warn(
+                                "  [guard] Context overflow detected, "
+                                "truncating large tool results..."
+                            )
+                            current_messages = self._truncate_large_tool_results(current_messages)
+                            overflow_attempt += 1
+                        elif overflow_attempt == 1:
+                            print_warn(
+                                "  [guard] Still overflowing, "
+                                "compacting conversation history..."
+                            )
+                            current_messages = await self.compact_history(current_messages)
+                            overflow_attempt += 1
+                        else:
+                            raise
 
-        raise RuntimeError("async_guard_api_call: exhausted retries")
+                    case ErrorType.RATE_LIMIT:
+                        if attempt < 3:
+                            wait = 2 ** attempt  # 1s, 2s, 4s
+                            print_warn(
+                                f"  [guard] Rate limited ({err.status_code}), "
+                                f"waiting {wait}s..."
+                            )
+                            await asyncio.sleep(wait)
+                        else:
+                            raise
+
+                    case ErrorType.AUTH_FAILURE:
+                        if self._router is not None and self._router.switch():
+                            new_model = self._router.current._model
+                            print_warn(
+                                f"  [guard] Auth failure, switched to {new_model}"
+                            )
+                        else:
+                            raise
+
+                    case ErrorType.SERVER_ERROR:
+                        if attempt < 2:
+                            wait = 2 * (attempt + 1)  # 2s, 4s
+                            print_warn(
+                                f"  [guard] Server error ({err.status_code}), "
+                                f"retrying in {wait}s..."
+                            )
+                            await asyncio.sleep(wait)
+                        else:
+                            raise
+
+                    case ErrorType.TIMEOUT:
+                        if attempt < 2:
+                            timeout_s = [60, 120, 180][attempt]
+                            print_warn(
+                                f"  [guard] Request timeout, "
+                                f"increasing to {timeout_s}s..."
+                            )
+                        else:
+                            raise
+
+                    case ErrorType.MODEL_UNAVAILABLE:
+                        if self._router is not None and self._router.switch():
+                            new_model = self._router.current._model
+                            print_warn(
+                                f"  [guard] Model unavailable, "
+                                f"switched to {new_model}"
+                            )
+                        else:
+                            raise
+
+                    case ErrorType.UNKNOWN:
+                        raise
+
+        raise RuntimeError("async_guard_api_call: exhausted all retries")

@@ -43,12 +43,17 @@ _KEYWORD_MAP: list[tuple[list[str], ErrorType]] = [
 def classify(exc: Exception) -> ProviderError:
     """将 SDK 异常映射为类型化 ProviderError。
 
+    已分类的 ProviderError 直接透传。
     三级匹配：
       1. 精确类型匹配（类名包含已知 SDK 异常名）
       2. status_code 匹配（针对有 status_code 属性的异常）
       3. 消息关键词兜底（针对非标准 provider）
     全部不匹配则返回 UNKNOWN。
     """
+    # 已分类的 ProviderError 直接透传
+    if isinstance(exc, ProviderError):
+        return exc
+
     msg = str(exc)
     status_code = getattr(exc, "status_code", 0) or 0
     exc_type_name = type(exc).__name__

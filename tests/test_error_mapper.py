@@ -117,6 +117,20 @@ class TestErrorMapperKeywordFallback:
         assert err.error_type == ErrorType.MODEL_UNAVAILABLE
 
 
+class TestErrorMapperPassthrough:
+    """Already-typed ProviderError should pass through unchanged."""
+
+    def test_provider_error_passthrough(self):
+        orig = ProviderError(ErrorType.RATE_LIMIT, "test", 429)
+        result = classify(orig)
+        assert result is orig  # same object, not re-classified
+
+    def test_provider_error_keeps_type(self):
+        orig = ProviderError(ErrorType.CONTEXT_OVERFLOW, "test")
+        result = classify(orig)
+        assert result.error_type == ErrorType.CONTEXT_OVERFLOW
+
+
 class TestErrorMapperUnknown:
     """Unrecognizable errors map to UNKNOWN."""
 
