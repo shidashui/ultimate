@@ -2,6 +2,7 @@
 change: tool-security-sandbox
 design-doc: docs/superpowers/specs/2026-06-23-tool-security-sandbox-design.md
 base-ref: 1a4761c9eac78d58632b4bf27c733a2d6179df76
+archived-with: 2026-06-23-tool-security-sandbox
 ---
 
 # Tool Security Sandbox Implementation Plan
@@ -24,6 +25,7 @@ base-ref: 1a4761c9eac78d58632b4bf27c733a2d6179df76
 - Existing blocklist in file_tools.py:25-28 and 62-73 replaced by Sandbox
 - 68+ existing tests must continue to pass
 
+archived-with: 2026-06-23-tool-security-sandbox
 ---
 
 ### Task 1: Create AuditLogger module
@@ -165,6 +167,7 @@ git add agentd/tools/audit.py
 git commit -m "feat: add AuditLogger with JSONL daily rotation"
 ```
 
+archived-with: 2026-06-23-tool-security-sandbox
 ---
 
 ### Task 2: Create Sandbox core module (L1-L3)
@@ -417,6 +420,7 @@ git add agentd/tools/sandbox.py
 git commit -m "feat: add Sandbox core (L1-L3) for command execution safety"
 ```
 
+archived-with: 2026-06-23-tool-security-sandbox
 ---
 
 ### Task 3: Add OS sandbox adapters (L4)
@@ -545,6 +549,7 @@ git add agentd/tools/sandbox.py
 git commit -m "feat: add OS sandbox adapters (bwrap/sandbox-exec/Job Objects)"
 ```
 
+archived-with: 2026-06-23-tool-security-sandbox
 ---
 
 ### Task 4: Integrate sandbox into tool_bash and tool_cmd
@@ -667,6 +672,7 @@ git add agentd/tools/file_tools.py
 git commit -m "feat: integrate Sandbox into tool_bash and tool_cmd"
 ```
 
+archived-with: 2026-06-23-tool-security-sandbox
 ---
 
 ### Task 5: Integrate AuditLogger into process_tool_call
@@ -771,6 +777,7 @@ git add agentd/agent/runner.py
 git commit -m "feat: integrate AuditLogger into process_tool_call"
 ```
 
+archived-with: 2026-06-23-tool-security-sandbox
 ---
 
 ### Task 6: Inject Sandbox + AuditLogger into Container
@@ -832,6 +839,7 @@ git add agentd/bootstrap/container.py
 git commit -m "feat: inject Sandbox and AuditLogger into Container"
 ```
 
+archived-with: 2026-06-23-tool-security-sandbox
 ---
 
 ### Task 7: Write security tests
@@ -1115,6 +1123,7 @@ git add tests/test_sandbox.py
 git commit -m "test: add sandbox security tests (L1-L4 + integration)"
 ```
 
+archived-with: 2026-06-23-tool-security-sandbox
 ---
 
 ### Task 8: Write audit tests + run full regression

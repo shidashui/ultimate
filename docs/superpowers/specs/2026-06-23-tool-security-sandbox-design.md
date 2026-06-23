@@ -2,6 +2,8 @@
 comet_change: tool-security-sandbox
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-06-23-tool-security-sandbox
+status: final
 ---
 
 # Tool Security Sandbox — 技术设计
