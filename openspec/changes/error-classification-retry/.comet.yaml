@@ -1,14 +1,14 @@
 workflow: full
-phase: build
+phase: verify
 build_mode: executing-plans
 build_pause: null
 isolation: branch
-verify_mode: null
+verify_mode: full
 base_ref: 83549a481757f03cd058edd9a7b73491ee1b263b
 design_doc: docs/superpowers/specs/2026-06-23-error-classification-retry-design.md
 plan: docs/superpowers/plans/2026-06-23-error-classification-retry.md
 verify_result: pending
-verification_report: null
+verification_report: docs/superpowers/reports/2026-06-23-error-classification-retry-verify.md
 branch_status: pending
 created_at: 2026-06-23
 verified_at: null
