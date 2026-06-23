@@ -1,0 +1,13 @@
+{
+  "change": "container-isolation",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "6d909abd798282264ec0fa27dc1560a5d469c3004ae183c7b706954a670a5315",
+  "files": [
+    { "path": "openspec/changes/container-isolation/proposal.md", "sha256": "f84ec3f2011f17ce97bfaddd28be60adff34d954aed260738830a85c4ed894d7" },
+    { "path": "openspec/changes/container-isolation/design.md", "sha256": "91419baeaf3c37324dc128944e78cf994e99c3d39a8c7cdae39d697c9f77a104" },
+    { "path": "openspec/changes/container-isolation/tasks.md", "sha256": "ca9a9a2cf2fe1d6057ca3fb8b8e8a3f21a8ea29c96ddbd5d4c0b50a3b5cd5b98" }
+  ]
+}

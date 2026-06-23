@@ -1,7 +1,7 @@
 # agentd/agent/runner.py
 import logging
 from datetime import datetime, timezone
-from agentd.bootstrap import container as _container
+from agentd.bootstrap import Container, set_current_container
 from agentd.context.session import SessionStore
 from agentd.context.context import ContextGuard
 from agentd.memory.memory import MemoryStore
@@ -24,17 +24,26 @@ class AgentRunner:
     调用方持有 messages 和 store，以引用形式传入，runner 直接修改。
     """
 
-    def __init__(self):
-        self.container    = _container
-        self.guard: ContextGuard  = _container.get("guard")
-        self.memory_store: MemoryStore  = _container.get("memory_store")
-        self.bootstrap_data: dict       = _container.get("bootstrap_data")
-        self.skills_mgr: SkillsManager  = _container.get("skills_mgr")
+    def __init__(self, session_id: str | None = None):
+        self.container = Container(session_id=session_id)
+        self.guard: ContextGuard  = self.container.get("guard")
+        self.memory_store: MemoryStore  = self.container.get("memory_store")
+        self.bootstrap_data: dict       = self.container.get("bootstrap_data")
+        self.skills_mgr: SkillsManager  = self.container.get("skills_mgr")
         self.skill_registry: str        = self.skills_mgr.format_skill_registry()
         self.max_iterations: int        = MAX_TOOL_ITERATIONS
 
         # System prompt 缓存 — 首次构建，跨轮复用
         self._cached_system_prompt: str | None = None
+
+    # ── 便捷属性（避免调用方越级访问 self.container）───
+    @property
+    def tools_handlers(self) -> dict:
+        return self.container.tools_handlers
+
+    @property
+    def session_db(self):
+        return self.container.get("session_db")
 
     # ── 工具调用 ──────────────────────────────────
     def process_tool_call(self, tool_name: str, tool_input: dict) -> str:
@@ -91,95 +100,99 @@ class AgentRunner:
 
         CLI 端通过 asyncio.run() 调用，Gateway 端直接 await。
         """
-        # 0. 重置 provider 到主（每 turn 重新开始）
-        provider_router = self.container.get("provider_router")
-        if provider_router:
-            provider_router.reset()
+        set_current_container(self.container)
+        try:
+            # 0. 重置 provider 到主（每 turn 重新开始）
+            provider_router = self.container.get("provider_router")
+            if provider_router:
+                provider_router.reset()
 
-        # 1. 记忆召回
-        memory_context = self.memory_store._auto_recall(user_input)
+            # 1. 记忆召回
+            memory_context = self.memory_store._auto_recall(user_input)
 
-        # 2. System prompt 缓存：首次构建，后续复用
-        if self._cached_system_prompt is None:
-            self._cached_system_prompt = build_system_prompt(
-                mode="full",
-                bootstrap=self.bootstrap_data,
-                skill_registry=self.skill_registry,
-                channel=channel,
-            )
-
-        # 3. 记忆上下文 + 时间戳注入 user message
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-        parts = [f"[系统时间: {now}]"]
-        if memory_context:
-            parts.append(f"[记忆上下文]\n{memory_context}")
-        parts.append(f"[用户消息]\n{user_input}")
-        user_content = "\n\n".join(parts)
-
-        messages.append({"role": "user", "content": user_content})
-        store.save_turn("user", user_input)
-
-        # 4. 工具循环（含迭代预算 + 预飞压缩）
-        budget = IterationBudget(self.max_iterations)
-        last_response = None
-
-        while budget.remaining > 0:
-            budget.consume()
-
-            # 预飞压缩：主动检查 token，超阈值先压缩
-            messages = await self.guard.preflight(self._cached_system_prompt, messages)
-
-            try:
-                response = await self.guard.async_guard_api_call(
-                    system=self._cached_system_prompt,
-                    messages=messages,
-                    tools=self.container.tools,
+            # 2. System prompt 缓存：首次构建，后续复用
+            if self._cached_system_prompt is None:
+                self._cached_system_prompt = build_system_prompt(
+                    mode="full",
+                    bootstrap=self.bootstrap_data,
+                    skill_registry=self.skill_registry,
+                    channel=channel,
                 )
-                last_response = response
-            except ProviderError as exc:
-                # 不可恢复错误 — 明确报错给用户
-                if exc.error_type in (ErrorType.AUTH_FAILURE,
-                                       ErrorType.MODEL_UNAVAILABLE):
-                    logger.error("[Runner] 不可恢复错误: %s (type=%s)",
-                                 exc, exc.error_type.value)
+
+            # 3. 记忆上下文 + 时间戳注入 user message
+            now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+            parts = [f"[系统时间: {now}]"]
+            if memory_context:
+                parts.append(f"[记忆上下文]\n{memory_context}")
+            parts.append(f"[用户消息]\n{user_input}")
+            user_content = "\n\n".join(parts)
+
+            messages.append({"role": "user", "content": user_content})
+            store.save_turn("user", user_input)
+
+            # 4. 工具循环（含迭代预算 + 预飞压缩）
+            budget = IterationBudget(self.max_iterations)
+            last_response = None
+
+            while budget.remaining > 0:
+                budget.consume()
+
+                # 预飞压缩：主动检查 token，超阈值先压缩
+                messages = await self.guard.preflight(self._cached_system_prompt, messages)
+
+                try:
+                    response = await self.guard.async_guard_api_call(
+                        system=self._cached_system_prompt,
+                        messages=messages,
+                        tools=self.container.tools,
+                    )
+                    last_response = response
+                except ProviderError as exc:
+                    # 不可恢复错误 — 明确报错给用户
+                    if exc.error_type in (ErrorType.AUTH_FAILURE,
+                                           ErrorType.MODEL_UNAVAILABLE):
+                        logger.error("[Runner] 不可恢复错误: %s (type=%s)",
+                                     exc, exc.error_type.value)
+                        self._rollback(messages)
+                        return (f"抱歉，服务暂时不可用。\n"
+                                f"  原因: {exc}\n"
+                                f"  请检查 API Key 配置或稍后重试。")
+                    # 可恢复但已耗尽重试
+                    logger.exception("[Runner] LLM 调用失败 (重试耗尽): %s", exc)
                     self._rollback(messages)
-                    return (f"抱歉，服务暂时不可用。\n"
-                            f"  原因: {exc}\n"
-                            f"  请检查 API Key 配置或稍后重试。")
-                # 可恢复但已耗尽重试
-                logger.exception("[Runner] LLM 调用失败 (重试耗尽): %s", exc)
-                self._rollback(messages)
-                return ""
-            except Exception as exc:
-                logger.exception("[Runner] LLM 调用异常: %s", exc)
-                self._rollback(messages)
-                return ""
+                    return ""
+                except Exception as exc:
+                    logger.exception("[Runner] LLM 调用异常: %s", exc)
+                    self._rollback(messages)
+                    return ""
 
-            messages.append({"role": "assistant", "content": self._serialize(response)})
-            store.save_turn("assistant", self._serialize(response))
+                messages.append({"role": "assistant", "content": self._serialize(response)})
+                store.save_turn("assistant", self._serialize(response))
 
-            if response.stop_reason == "end_turn":
-                return self._extract_text(response)
+                if response.stop_reason == "end_turn":
+                    return self._extract_text(response)
 
-            elif response.stop_reason == "tool_use":
-                tool_results = []
-                for block in response.content:
-                    if block.type != "tool_use":
-                        continue
-                    result = self.process_tool_call(block.name, block.input)
-                    store.save_tool_result(block.id, block.name, block.input, result)
-                    tool_results.append({
-                        "type":        "tool_result",
-                        "tool_use_id": block.id,
-                        "content":     result,
-                    })
-                messages.append({"role": "user", "content": tool_results})
+                elif response.stop_reason == "tool_use":
+                    tool_results = []
+                    for block in response.content:
+                        if block.type != "tool_use":
+                            continue
+                        result = self.process_tool_call(block.name, block.input)
+                        store.save_tool_result(block.id, block.name, block.input, result)
+                        tool_results.append({
+                            "type":        "tool_result",
+                            "tool_use_id": block.id,
+                            "content":     result,
+                        })
+                    messages.append({"role": "user", "content": tool_results})
 
-            else:
-                logger.info("[Runner] stop_reason=%s", response.stop_reason)
-                return self._extract_text(response)
+                else:
+                    logger.info("[Runner] stop_reason=%s", response.stop_reason)
+                    return self._extract_text(response)
 
-        # 预算耗尽 — 返回最后一条 assistant 文本
-        if last_response:
-            return self._extract_text(last_response)
-        return "已达到工具调用上限，对话终止。"
+            # 预算耗尽 — 返回最后一条 assistant 文本
+            if last_response:
+                return self._extract_text(last_response)
+            return "已达到工具调用上限，对话终止。"
+        finally:
+            set_current_container(None)

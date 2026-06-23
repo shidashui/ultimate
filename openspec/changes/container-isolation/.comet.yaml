@@ -1,0 +1,18 @@
+workflow: full
+phase: build
+build_mode: executing-plans
+build_pause: null
+isolation: branch
+verify_mode: null
+base_ref: d2199f118159cd179ba965d4df9784b8bbc934ad
+design_doc: docs/superpowers/specs/2026-06-23-container-isolation-design.md
+plan: docs/superpowers/plans/2026-06-23-container-isolation.md
+verify_result: pending
+verification_report: null
+branch_status: pending
+created_at: 2026-06-23
+verified_at: null
+archived: false
+handoff_context: openspec/changes/container-isolation/.comet/handoff/design-context.json
+handoff_hash: 6d909abd798282264ec0fa27dc1560a5d469c3004ae183c7b706954a670a5315
+build_command: python -c "from agentd.bootstrap import Container, set_current_container, get_current_container; from agentd.agent.runner import AgentRunner; print('Build OK')"

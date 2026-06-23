@@ -4,10 +4,10 @@ from typing import Any
 
 def tool_skill_invoke(name: str, args: str = "") -> str:
     """按需加载指定技能模块，返回完整操作指令正文。"""
-    from agentd.bootstrap import container  # 延迟导入，避免循环依赖
+    from agentd.bootstrap import get_current_container
 
     print_tool("skill_invoke", name)
-    skills_mgr = container.get("skills_mgr")
+    skills_mgr = get_current_container().get("skills_mgr")
 
     skill = skills_mgr.get_skill(name)
     if skill is None:

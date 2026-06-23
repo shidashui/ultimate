@@ -18,7 +18,7 @@ class Cli:
         self.messages: list[dict] = []
         self.runner = AgentRunner()
         # 注入 SessionDB 到 SessionStore（FTS5 全文搜索）
-        session_db = self.runner.container.get("session_db")
+        session_db = self.runner.session_db
         if session_db:
             self.store.session_db = session_db
 
@@ -52,7 +52,7 @@ class Cli:
         info_lines = [
             f"[primary]当前模型:[/primary] {MODEL.default}",
             f"[primary]会话ID:[/primary] {self.store.current_session_id}",
-            f"[primary]工具列表:[/primary] {', '.join(self.runner.container.tools_handlers.keys())}",
+            f"[primary]工具列表:[/primary] {', '.join(self.runner.tools_handlers.keys())}",
             f"[primary]工作区:[/primary] {WORKSPACE_DIR}",
             f"[primary]已加载文件:[/primary] {len(self.runner.bootstrap_data)}",
             f"[primary]已发现技能:[/primary] {len(self.runner.skills_mgr.skills)}",

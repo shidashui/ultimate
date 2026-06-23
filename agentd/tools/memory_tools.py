@@ -8,18 +8,18 @@ from typing import Any
 
 
 def tool_memory_write(content: str, category: str = "general") -> str:
-    from agentd.bootstrap import container  # 延迟导入，避免循环依赖
+    from agentd.bootstrap import get_current_container
 
     print_tool("memory_write", f"[{category}] {content[:60]}...")
-    memory_store = container.get("memory_store")  # 从依赖注入容器获取 MemoryStore 实例
+    memory_store = get_current_container().get("memory_store")
     return memory_store.write_memory(content, category)
 
 
 def tool_memory_search(query: str, top_k: int = 5) -> str:
-    from agentd.bootstrap import container  # 延迟导入，避免循环依赖
+    from agentd.bootstrap import get_current_container
 
     print_tool("memory_search", query)
-    memory_store = container.get("memory_store")  # 从依赖注入容器获取 MemoryStore 实例
+    memory_store = get_current_container().get("memory_store")
     results = memory_store.hybrid_search(query, top_k)
     if not results:
         return "No relevant memories found."
