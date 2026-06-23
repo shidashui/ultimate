@@ -17,6 +17,10 @@ class Cli:
         self.store = SessionStore(base_dir=WORKSPACE_DIR, agent_id="zero")
         self.messages: list[dict] = []
         self.runner = AgentRunner()
+        # 注入 SessionDB 到 SessionStore（FTS5 全文搜索）
+        session_db = self.runner.container.get("session_db")
+        if session_db:
+            self.store.session_db = session_db
 
     def init_run(self):
         # 构建动态补全列表（硬编码命令 + 技能调用名）

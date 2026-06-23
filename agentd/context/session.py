@@ -14,13 +14,15 @@ from datetime import datetime, timezone
 class SessionStore:
     """管理 agent 会话的持久化存储。"""
 
-    def __init__(self, base_dir: Path, agent_id: str = "default", user_name: str = "User"):
+    def __init__(self, base_dir: Path, agent_id: str = "default",
+                 user_name: str = "User", session_db=None):
         self.agent_id = agent_id
         self.user_name = user_name
         self.base_dir = base_dir
         self.index_path = self.base_dir.parent / "sessions.json"
         self._index: dict[str, dict] = self._load_index()
         self.current_session_id: str | None = None
+        self.session_db = session_db  # FTS5 索引
     
     def set_user_name(self, user_name: str):
         self.user_name = user_name
@@ -76,11 +78,18 @@ class SessionStore:
     def save_turn(self, role: str, content: Any) -> None:
         if not self.current_session_id:
             return
+        ts = time.time()
         self.append_transcript(self.current_session_id, {
             "type": role,
             "content": content,
-            "ts": time.time(),
+            "ts": ts,
         })
+        # FTS5 索引: 仅 user/assistant 文本
+        if self.session_db is not None and role in ("user", "assistant"):
+            text = self._extract_text(content)
+            self.session_db.index_turn(
+                self.current_session_id, role, text, ts
+            )
 
     def save_tool_result(self, tool_use_id: str, name: str,
                          tool_input: dict, result: str) -> None:
@@ -191,6 +200,21 @@ class SessionStore:
                     })
 
         return messages
+
+    @staticmethod
+    def _extract_text(content) -> str:
+        """从 save_turn 的 content 中提取纯文本。
+        user 消息是 str，assistant 消息是 list[dict]（_serialize 的输出）。
+        """
+        if isinstance(content, str):
+            return content
+        if isinstance(content, list):
+            parts = []
+            for block in content:
+                if isinstance(block, dict) and block.get("type") == "text":
+                    parts.append(block.get("text", ""))
+            return " ".join(parts)
+        return str(content)
 
     def list_sessions(self) -> list[tuple[str, dict]]:
         items = list(self._index.items())
