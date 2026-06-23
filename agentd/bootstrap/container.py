@@ -15,6 +15,11 @@ class Container:
 
         self.initialize()
 
+    @property
+    def tools_schemas(self) -> dict:
+        """{tool_name: {param: {type, description}}} — 供 param_repair 做类型强转。"""
+        return {t["name"]: t["input_schema"]["properties"] for t in self.tools}
+
     def register(self, name, instance):
         self.services[name] = instance
 
