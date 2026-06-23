@@ -7,7 +7,8 @@ from agentd.context.context import ContextGuard
 from agentd.tools.tool_handlers import get_tools, get_tool_handlers
 
 class Container:
-    def __init__(self):
+    def __init__(self, session_id: str | None = None):
+        self.session_id = session_id
         self.tools = []
         self.tools_handlers = {}
         self.services = {}
@@ -49,6 +50,3 @@ class Container:
 
         self.tools = get_tools()
         self.tools_handlers = get_tool_handlers()
-
-# ✅ 全局唯一实例（但不是全局变量乱飞）
-container = Container()
