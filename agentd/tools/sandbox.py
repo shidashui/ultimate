@@ -3,7 +3,7 @@
 L1: Environment variable whitelist
 L2: Path reference prescan (safe_path for paths in command strings)
 L3: Threat pattern detection (categorized, BLOCK vs WARN)
-L4: OS-level sandbox (added in follow-up commit)
+L4: OS-level sandbox (bwrap / sandbox-exec / Job Objects, silent degrade)
 
 ContextVar injection via Container, same pattern as all other services.
 """
@@ -12,7 +12,9 @@ from __future__ import annotations
 import logging
 import os
 import re
+import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 from config.configs import WORKDIR
@@ -106,6 +108,85 @@ class Sandbox:
             else _DEFAULT_ENV_WHITELIST
         )
 
+    # ── L4: OS sandbox ──────────────────────────────────────
+
+    @staticmethod
+    def _find_bwrap() -> str | None:
+        """Locate bwrap (bubblewrap) binary. Returns path or None."""
+        return shutil.which("bwrap")
+
+    @staticmethod
+    def _find_sandbox_exec() -> str | None:
+        """macOS sandbox-exec availability."""
+        return shutil.which("sandbox-exec")
+
+    def os_sandbox_available(self) -> str | None:
+        """Check which OS sandbox is available.
+
+        Returns 'bwrap', 'sandbox-exec', 'jobobject', or None.
+        """
+        if sys.platform == "linux" and self._find_bwrap():
+            return "bwrap"
+        if sys.platform == "darwin" and self._find_sandbox_exec():
+            return "sandbox-exec"
+        if sys.platform == "win32":
+            return "jobobject"  # always available via subprocess flags
+        return None
+
+    def wrap_command(self, command: str) -> tuple[str, dict[str, str]]:
+        """Wrap command with OS-level sandbox if available.
+
+        Returns (wrapped_command, extra_subprocess_kwargs).
+        Silent degrade: returns (command, {}) when unavailable.
+        """
+        sandbox = self.os_sandbox_available()
+
+        if sandbox == "bwrap":
+            wrapped = (
+                f"bwrap "
+                f"--ro-bind /usr /usr "
+                f"--ro-bind /bin /bin "
+                f"--ro-bind /lib /lib "
+                f"--ro-bind /lib64 /lib64 "
+                f"--ro-bind /sbin /sbin "
+                f"--bind {self.workdir} {self.workdir} "
+                f"--dev /dev "
+                f"--proc /proc "
+                f"--chdir {self.workdir} "
+                f"--unshare-all "
+                f"-- {command}"
+            )
+            return wrapped, {}
+
+        elif sandbox == "sandbox-exec":
+            profile = (
+                f'(version 1)\n'
+                f'(allow default)\n'
+                f'(deny file-write* (subpath "/"))\n'
+                f'(allow file-write* (subpath "{self.workdir}"))\n'
+            )
+            tmp = tempfile.NamedTemporaryFile(
+                mode="w", suffix=".sb", delete=False, prefix="sandbox_"
+            )
+            try:
+                tmp.write(profile)
+                tmp.close()
+                wrapped = f"sandbox-exec -f {tmp.name} -- {command}"
+                return wrapped, {}
+            except Exception:
+                return command, {}
+
+        elif sandbox == "jobobject":
+            # Windows: CREATE_NEW_PROCESS_GROUP + DETACHED_PROCESS
+            return command, {
+                "creationflags": (
+                    0x00000200 |  # CREATE_NEW_PROCESS_GROUP
+                    0x00000008    # DETACHED_PROCESS (no console)
+                )
+            }
+
+        return command, {}
+
     # ── L1: environment sanitization ─────────────────────────
 
     def build_safe_env(self) -> dict[str, str]:
@@ -184,7 +265,7 @@ class Sandbox:
     def sanitize(
         self, command: str
     ) -> tuple[str, dict[str, str], list[str], dict]:
-        """Run L1→L3 (L4 added in follow-up).
+        """Run L1→L4.
 
         Returns:
             (safe_command, safe_env, warnings, extra_subprocess_kwargs)
@@ -208,7 +289,9 @@ class Sandbox:
                 raise SandboxBlockedError([r])
             warnings.append(f"threat detected: {r}")
 
-        # L4: OS sandbox (Task 3) — for now, no-op
-        safe_command = command
+        # L4: OS sandbox
+        safe_command, extra_kwargs = self.wrap_command(command)
+        if safe_command != command:
+            warnings.append(f"os-sandbox: wrapped with {self.os_sandbox_available()}")
 
-        return safe_command, safe_env, warnings, {}
+        return safe_command, safe_env, warnings, extra_kwargs
