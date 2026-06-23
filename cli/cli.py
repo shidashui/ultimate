@@ -219,13 +219,32 @@ class Cli:
             if not arg:
                 print_yellow_info("用法: /search <query>")
                 return True
-            print_section(f"记忆搜索: {arg}")
+            print_section(f"搜索: {arg}")
             results = self.runner.memory_store.hybrid_search(arg)
             if not results:
                 print_info("(无结果)")
             else:
-                for r in results:
-                    print_memory_info(r)
+                # 按来源分组
+                memory_results = [r for r in results if r.get("source") != "session"]
+                session_results = [r for r in results if r.get("source") == "session"]
+
+                if memory_results:
+                    console.print(
+                        f"\n[muted]── 记忆 ({len(memory_results)} 条) ──[/muted]")
+                    for r in memory_results:
+                        print_memory_info(r)
+
+                if session_results:
+                    console.print(
+                        f"\n[muted]── 对话 ({len(session_results)} 条) ──[/muted]")
+                    for r in session_results:
+                        role_label = ("[info]You[/info]" if r.get("role") == "user"
+                                      else "[success]AI[/success]")
+                        sid_short = r.get("session_id", "")[:8]
+                        console.print(
+                            f"  {role_label} [{sid_short}] "
+                            f"[muted]{r['snippet']}[/muted]"
+                        )
             return True
 
         elif cmd == "/prompt":
