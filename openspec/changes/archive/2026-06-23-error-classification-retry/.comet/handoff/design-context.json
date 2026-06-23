@@ -1,0 +1,14 @@
+{
+  "change": "error-classification-retry",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "bd455d4c430dccae5115ce83b2e9d8982ea8ac16b0dbc967e61c4c1acc3d2490",
+  "files": [
+    { "path": "openspec/changes/error-classification-retry/proposal.md", "sha256": "8ad1d87dcb46f6de41d021609082906f745ddf1545c39a68146fb8774b956108" },
+    { "path": "openspec/changes/error-classification-retry/design.md", "sha256": "aeb7a28a22d100da7f274f91b48fc835cb1ec50c564c2063a91b98ed56c5917e" },
+    { "path": "openspec/changes/error-classification-retry/tasks.md", "sha256": "f6b675f1b3055b67d9eab6f69be43bf94b80f33574e57e20d53963654016dbd0" },
+    { "path": "openspec/changes/error-classification-retry/specs/error-handling/spec.md", "sha256": "0d70f34d0274316d641815ed27973e279832ca8d9b93c9c1e5875dee14924ca5" }
+  ]
+}
