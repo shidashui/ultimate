@@ -27,6 +27,12 @@ class Container:
         skills_mgr = SkillsManager(WORKSPACE_DIR)
         skills_mgr.discover()
         memory_store = MemoryStore(WORKSPACE_DIR)
+        # SessionDB — FTS5 全文搜索对话历史
+        from agentd.session.session_db import SessionDB
+        session_db_path = WORKSPACE_DIR / ".sessions" / "sessions.db"
+        session_db_path.parent.mkdir(parents=True, exist_ok=True)
+        session_db = SessionDB(session_db_path)
+        memory_store.session_db = session_db
         # Provider — 由 config.yaml 驱动
         provider = get_model_provider()
         guard = ContextGuard(provider=provider)
@@ -34,6 +40,7 @@ class Container:
         self.register("bootstrap_data", bootstrap_data)
         self.register("skills_mgr", skills_mgr)
         self.register("memory_store", memory_store)
+        self.register("session_db", session_db)
         self.register("guard", guard)
         self.register("provider", provider)
 
