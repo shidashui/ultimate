@@ -2,6 +2,8 @@
 comet_change: voice-platform-refactor
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-06-23-voice-platform-refactor
+status: final
 ---
 
 # Voice Platform Refactor — Technical Design

@@ -2,6 +2,7 @@
 change: voice-platform-refactor
 design-doc: docs/superpowers/specs/2026-06-23-voice-platform-refactor-design.md
 base-ref: e30194df1b8d5a20da328c70a661e0a15819f89b
+archived-with: 2026-06-23-voice-platform-refactor
 ---
 
 # Voice Platform Refactor — Implementation Plan
@@ -23,6 +24,7 @@ base-ref: e30194df1b8d5a20da328c70a661e0a15819f89b
 - `edge-tts` already installed (7.2.8), `silero-vad` + `onnxruntime` added
 - Audio modules (sounddevice, silero) only importable on actual hardware — tests mock them
 
+archived-with: 2026-06-23-voice-platform-refactor
 ---
 
 ### Task 1: Replace `_speak()` with edge-tts async, remove pyttsx3
@@ -114,6 +116,7 @@ git add platforms/voice.py requirements.txt
 git commit -m "feat(voice): replace pyttsx3 with edge-tts async TTS"
 ```
 
+archived-with: 2026-06-23-voice-platform-refactor
 ---
 
 ### Task 2: Verify TTS output quality
@@ -188,6 +191,7 @@ git add tests/test_voice_platform.py
 git commit -m "test(voice): add TTS unit tests for edge-tts"
 ```
 
+archived-with: 2026-06-23-voice-platform-refactor
 ---
 
 ### Task 3: Add `voice:` config section to config.yaml + VoiceConfig dataclass
@@ -303,6 +307,7 @@ git add config.yaml config/configs.py
 git commit -m "feat(config): add VoiceConfig dataclass and voice: config section"
 ```
 
+archived-with: 2026-06-23-voice-platform-refactor
 ---
 
 ### Task 4: Create `platforms/voice/` package with Protocol interfaces
@@ -436,6 +441,7 @@ git add platforms/voice/
 git commit -m "feat(voice): create platforms/voice package with Protocol interfaces"
 ```
 
+archived-with: 2026-06-23-voice-platform-refactor
 ---
 
 ### Task 5: Implement AudioIO module (recording + Silero-VAD)
@@ -631,6 +637,7 @@ git add platforms/voice/audio.py
 git commit -m "feat(voice): implement AudioIO with Silero-VAD endpoint detection"
 ```
 
+archived-with: 2026-06-23-voice-platform-refactor
 ---
 
 ### Task 6: Implement STT module (faster-whisper with memory pipe)
@@ -726,6 +733,7 @@ git add platforms/voice/stt.py
 git commit -m "feat(voice): implement STT with faster-whisper in-memory pipeline"
 ```
 
+archived-with: 2026-06-23-voice-platform-refactor
 ---
 
 ### Task 7: Implement TTS module (edge-tts async wrapper)
@@ -807,6 +815,7 @@ git add platforms/voice/tts.py
 git commit -m "feat(voice): implement TTS with edge-tts async wrapper"
 ```
 
+archived-with: 2026-06-23-voice-platform-refactor
 ---
 
 ### Task 8: Implement WakeWord module (Silero VAD pre-filter + Whisper confirm)
@@ -900,6 +909,7 @@ git add platforms/voice/wake.py
 git commit -m "feat(voice): implement TwoStageWakeWord with Silero pre-filter + Whisper confirm"
 ```
 
+archived-with: 2026-06-23-voice-platform-refactor
 ---
 
 ### Task 9: Rewrite VoicePlatform as orchestrator, delete old voice.py
@@ -1093,6 +1103,7 @@ git rm platforms/voice.py
 git commit -m "feat(voice): rewrite VoicePlatform as modular orchestrator, remove monolithic voice.py"
 ```
 
+archived-with: 2026-06-23-voice-platform-refactor
 ---
 
 ### Task 10: Update ultimate.py gateway_cmd() for config-driven mode
@@ -1143,6 +1154,7 @@ git add ultimate.py
 git commit -m "refactor(voice): simplify gateway_cmd() to use config-driven VoicePlatform"
 ```
 
+archived-with: 2026-06-23-voice-platform-refactor
 ---
 
 ### Task 11: Write comprehensive tests and finalize tasks.md
