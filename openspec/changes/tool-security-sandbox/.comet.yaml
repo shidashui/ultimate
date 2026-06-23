@@ -1,0 +1,19 @@
+workflow: full
+phase: build
+build_mode: executing-plans
+build_pause: null
+isolation: branch
+verify_mode: null
+base_ref: 1a4761c9eac78d58632b4bf27c733a2d6179df76
+design_doc: docs/superpowers/specs/2026-06-23-tool-security-sandbox-design.md
+plan: docs/superpowers/plans/2026-06-23-tool-security-sandbox.md
+verify_result: pending
+verification_report: null
+branch_status: pending
+created_at: 2026-06-23
+verified_at: null
+archived: false
+build_command: python -c "import agentd; print('OK')"
+verify_command: python -m pytest tests/ -x -q
+handoff_context: openspec/changes/tool-security-sandbox/.comet/handoff/design-context.json
+handoff_hash: 4123389bfd394235a493d4c5c086cd922874c514a0bfec07c4c5581302e76400
