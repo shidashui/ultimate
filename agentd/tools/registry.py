@@ -63,6 +63,13 @@ class ToolRegistry:
         """返回 {name: handler} 映射。"""
         return dict(self._handlers)
 
+    def get_tool_schema(self, name: str) -> dict | None:
+        """返回 {param_name: {type, description}, ...} 或 None（未知工具）。"""
+        for tool in self._tools:
+            if tool["name"] == name:
+                return tool["input_schema"]["properties"]
+        return None
+
     def get_toolsets(self) -> dict[str, list[str]]:
         """返回 {toolset: [tool_names]} 映射。"""
         return {k: list(v) for k, v in self._toolsets.items()}
