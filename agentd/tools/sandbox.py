@@ -228,9 +228,10 @@ class Sandbox:
             path_candidates.add(m.group())
 
         # $HOME, $TMP, %USERPROFILE% etc.
-        for m in re.finditer(r'\$(?:HOME|TMP|TMPDIR)/(?:[a-zA-Z0-9._-]+/)*[a-zA-Z0-9._-]*', command):
+        # Match $VAR/path/... or $VAR (non-greedy, stop at whitespace/semicolons)
+        for m in re.finditer(r'\$(?:HOME|TMP|TMPDIR|TMPDIR)(?:/[^\s;|&]*)?', command):
             path_candidates.add(m.group())
-        for m in re.finditer(r'%(?:USERPROFILE|APPDATA|LOCALAPPDATA|TEMP|TMP)%', command):
+        for m in re.finditer(r'%(?:USERPROFILE|APPDATA|LOCALAPPDATA|TEMP|TMP)%(?:\\[^\s;|&]*)?', command):
             path_candidates.add(m.group())
 
         for candidate in path_candidates:
