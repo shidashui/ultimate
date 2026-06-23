@@ -223,3 +223,39 @@ class TestGuardRetry:
         )
         assert result.content[0].text == "hello"
         assert p._chat.call_count == 1
+
+
+class TestIntegration:
+    """End-to-end error flow tests."""
+
+    @pytest.mark.asyncio
+    async def test_full_retry_chain(self):
+        """A full chain: RATE_LIMIT → retry → SERVER_ERROR → retry → success."""
+        p = FakeProvider()
+        p._chat.side_effect = [
+            make_error(ErrorType.RATE_LIMIT, "rate", 429),
+            make_error(ErrorType.SERVER_ERROR, "server", 503),
+            make_response("finally ok"),
+        ]
+        router = ProviderRouter([p])
+        guard = ContextGuard(provider_router=router)
+
+        result = await guard.async_guard_api_call(
+            system="", messages=[{"role": "user", "content": "hi"}],
+        )
+        assert result.content[0].text == "finally ok"
+        assert p._chat.call_count == 3
+
+    @pytest.mark.asyncio
+    async def test_auth_failure_fatal(self):
+        """AUTH_FAILURE with no backup → fatal."""
+        p = FakeProvider()
+        p._chat.side_effect = make_error(ErrorType.AUTH_FAILURE, "no key", 401)
+        router = ProviderRouter([p])
+        guard = ContextGuard(provider_router=router)
+
+        with pytest.raises(ProviderError) as exc_info:
+            await guard.async_guard_api_call(
+                system="", messages=[{"role": "user", "content": "hi"}],
+            )
+        assert exc_info.value.error_type == ErrorType.AUTH_FAILURE
