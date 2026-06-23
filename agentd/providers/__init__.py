@@ -39,4 +39,31 @@ def get_provider(config) -> BaseProvider:
     )
 
 
-__all__ = ["BaseProvider", "Response", "ContentBlock", "get_provider"]
+def get_all_providers(config) -> list:
+    """返回 config 中所有 provider 的实例列表。
+
+    第一个是主 provider，后续是备选。
+    用于构造 ProviderRouter。
+    """
+    from agentd.providers.anthropic import AnthropicProvider
+
+    instances = []
+    for provider_cfg in config.model.providers:
+        if not provider_cfg.api_key:
+            continue  # 跳过未配置 key 的 provider
+        instances.append(AnthropicProvider(
+            api_key=provider_cfg.api_key,
+            base_url=provider_cfg.base_url,
+            model=provider_cfg.model,
+        ))
+
+    if not instances:
+        raise ValueError(
+            "No providers with valid API keys configured. "
+            "Check config.yaml model.providers and environment variables."
+        )
+    return instances
+
+
+__all__ = ["BaseProvider", "Response", "ContentBlock", "ErrorType", "ProviderError",
+           "get_provider", "get_all_providers"]
