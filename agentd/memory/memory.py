@@ -287,19 +287,37 @@ class MemoryStore:
         """Full hybrid search pipeline: keyword -> vector -> merge -> decay -> MMR -> top_k"""
         chunks = self._load_all_chunks()
         if not chunks:
-            return []
-        keyword_results = self._keyword_search(query, chunks, top_k=10)
-        vector_results = self._vector_search(query, chunks, top_k=10)
-        merged = self._merge_hybrid_results(vector_results, keyword_results)
-        decayed = self._temporal_decay(merged)
-        reranked = self._mmr_rerank(decayed)
-        result = []
-        for r in reranked[:top_k]:
-            snippet = r["chunk"]["text"]
-            if len(snippet) > 200:
-                snippet = snippet[:200] + "..."
-            result.append({"path": r["chunk"]["path"], "score": round(r["score"], 4), "snippet": snippet})
-        return result
+            result = []
+        else:
+            keyword_results = self._keyword_search(query, chunks, top_k=10)
+            vector_results = self._vector_search(query, chunks, top_k=10)
+            merged = self._merge_hybrid_results(vector_results, keyword_results)
+            decayed = self._temporal_decay(merged)
+            reranked = self._mmr_rerank(decayed)
+            result = []
+            for r in reranked[:top_k]:
+                snippet = r["chunk"]["text"]
+                if len(snippet) > 200:
+                    snippet = snippet[:200] + "..."
+                result.append({
+                    "path": r["chunk"]["path"],
+                    "score": round(r["score"], 4),
+                    "snippet": snippet,
+                    "source": "memory",
+                })
+
+        # Merge FTS5 session search results
+        session_db = getattr(self, 'session_db', None)
+        if session_db is not None:
+            try:
+                session_results = session_db.search(query, limit=top_k)
+                result.extend(session_results)
+            except Exception:
+                pass  # 降级：会话搜索失败不阻塞记忆搜索
+
+        # Sort by score descending
+        result.sort(key=lambda x: x.get("score", 0), reverse=True)
+        return result[:top_k]
 
     def get_stats(self) -> dict[str, Any]:
         evergreen = self.load_evergreen()

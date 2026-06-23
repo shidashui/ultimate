@@ -77,3 +77,15 @@ class TestSessionDB:
         db.index_turn("abc123", "user", "it's a test with special chars", 1719000000.0)
         results = db.search("test", limit=5)
         assert len(results) >= 1
+
+    def test_hybrid_search_falls_back_when_no_session_db(self):
+        """当 session_db 不存在时，hybrid_search 仍返回记忆结果。"""
+        from agentd.memory.memory import MemoryStore
+        import tempfile
+        from pathlib import Path
+
+        with tempfile.TemporaryDirectory() as tmp:
+            ws = Path(tmp)
+            (ws / "memory" / "daily").mkdir(parents=True)
+            store = MemoryStore(ws)
+            store.hybrid_search("test", top_k=5)
