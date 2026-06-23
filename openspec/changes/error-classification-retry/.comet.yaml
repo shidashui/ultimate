@@ -1,0 +1,18 @@
+workflow: full
+phase: build
+build_mode: executing-plans
+build_pause: null
+isolation: branch
+verify_mode: null
+base_ref: 83549a481757f03cd058edd9a7b73491ee1b263b
+design_doc: docs/superpowers/specs/2026-06-23-error-classification-retry-design.md
+plan: docs/superpowers/plans/2026-06-23-error-classification-retry.md
+verify_result: pending
+verification_report: null
+branch_status: pending
+created_at: 2026-06-23
+verified_at: null
+archived: false
+handoff_context: openspec/changes/error-classification-retry/.comet/handoff/design-context.json
+build_command: python -c "from config.configs import get_config; from agentd.bootstrap.container import Container; from agentd.providers.error_mapper import classify; from agentd.providers.router import ProviderRouter; from agentd.providers.base import ErrorType, ProviderError; print('Build OK')"
+handoff_hash: bd455d4c430dccae5115ce83b2e9d8982ea8ac16b0dbc967e61c4c1acc3d2490
