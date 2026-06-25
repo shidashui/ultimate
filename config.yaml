@@ -41,6 +41,12 @@ skills:
   max_skills: 150
   max_skills_prompt: 30000
 
+# ── GUI: Tauri desktop app ────────────────────────────────────────
+gui:
+  ws_port: 18765
+  tauri_bin: null                    # auto-detect if null
+  auto_hide_delay: 10                # seconds before auto-hide
+
 # ── Voice: voice platform parameters ────────────────────────────────
 voice:
   model: small
