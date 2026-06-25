@@ -109,12 +109,16 @@ class Gateway:
         store    = self._get_user_store(msg.user_id, platform.platform_name)
         messages = self._user_messages[msg.user_id]
 
+        # 获取平台的可选 streaming 回调（如 VoicePlatform）
+        on_chunk = getattr(platform, 'get_text_chunk_callback', lambda: None)()
+
         async with self._get_user_lock(msg.user_id):
             reply = await self.runner.run_turn(
                 user_input=msg.content,
                 messages=messages,
                 store=store,
                 channel=platform.channel,
+                on_text_chunk=on_chunk,
             )
 
         await platform.send(Reply(
