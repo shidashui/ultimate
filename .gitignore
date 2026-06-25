@@ -64,7 +64,6 @@ ui/dist/
 .superpowers/
 
 # ── Workspace / Runtime ─────────────────────────
-workspace/
 sessions.json
 
 # ── Misc ─────────────────────────────────────────
