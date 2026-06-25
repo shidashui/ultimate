@@ -1,5 +1,6 @@
 import asyncio
 import json
+from collections.abc import Callable
 from typing import Any
 from config.configs import CONTEXT_SAFE_LIMIT
 from utils.print_tools import print_session, print_warn
@@ -319,3 +320,78 @@ class ContextGuard:
                         raise
 
         raise RuntimeError("async_guard_api_call: exhausted all retries")
+
+    async def async_guard_stream_call(
+        self,
+        system: str,
+        messages: list[dict],
+        tools: list[dict] | None = None,
+        on_chunk: Callable[[str], None] | None = None,
+    ) -> Any:
+        """
+        Streaming 路径的 guard 保护:
+
+          CONTEXT_OVERFLOW  → 截断工具结果 → 压缩历史 → 抛出
+          AUTH_FAILURE      → 切换 provider → 重试 / 抛出
+          MODEL_UNAVAILABLE → 切换 provider → 重试 / 抛出
+          RATE_LIMIT        → 立即抛出，不重试 (chunks 可能已发出)
+          SERVER_ERROR      → 立即抛出，不重试
+          TIMEOUT           → 立即抛出，不重试
+        """
+        current_messages = messages
+        timeout_s = 30
+        overflow_attempt = 0
+
+        for attempt in range(3):  # 安全上限
+            provider = self._get_provider()
+            try:
+                # 预飞压缩 — 在 stream 建立前执行
+                current_messages = await self.preflight(system, current_messages)
+
+                return await provider.chat_stream(
+                    messages=current_messages,
+                    system=system,
+                    tools=tools,
+                    on_text_chunk=on_chunk,
+                    timeout=timeout_s,
+                )
+
+            except Exception as exc:
+                err = classify(exc)
+
+                # CONTEXT_OVERFLOW: 安全保留 — 在 stream 建立前检测
+                if err.error_type == ErrorType.CONTEXT_OVERFLOW:
+                    if overflow_attempt == 0:
+                        print_warn(
+                            "  [guard:stream] Context overflow detected, "
+                            "truncating large tool results..."
+                        )
+                        current_messages = self._truncate_large_tool_results(current_messages)
+                        overflow_attempt += 1
+                    elif overflow_attempt == 1:
+                        print_warn(
+                            "  [guard:stream] Still overflowing, "
+                            "compacting conversation history..."
+                        )
+                        current_messages = await self.compact_history(current_messages)
+                        overflow_attempt += 1
+                    else:
+                        raise
+
+                # AUTH / MODEL 切换: 安全重试 — 连接级
+                elif err.error_type in (ErrorType.AUTH_FAILURE,
+                                         ErrorType.MODEL_UNAVAILABLE):
+                    if self._router is not None and self._router.switch():
+                        new_model = self._router.current._model
+                        print_warn(
+                            f"  [guard:stream] Auth/model unavailable, "
+                            f"switched to {new_model}"
+                        )
+                        continue
+                    raise
+
+                # RATE_LIMIT / SERVER_ERROR / TIMEOUT: 不重试
+                else:
+                    raise
+
+        raise RuntimeError("async_guard_stream_call: exhausted all retries")
