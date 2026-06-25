@@ -1,0 +1,19 @@
+workflow: full
+phase: archive
+build_mode: executing-plans
+build_pause: null
+isolation: branch
+verify_mode: null
+base_ref: 23dcfe29a18ba50da29969c1285a162aebfbfe65
+design_doc: docs/superpowers/specs/2026-06-25-jarvis-desktop-gui-design.md
+plan: docs/superpowers/plans/2026-06-25-jarvis-desktop-gui.md
+build_command: cd ui && npx vite build
+verify_command: python -c "from gateway.tauri_platform import TauriPlatform; from gateway.events import wake_event; from platforms.voice.platform import VoicePlatform; print('All Python imports OK')"
+verify_result: pass
+verification_report: docs/superpowers/reports/2026-06-25-jarvis-desktop-gui-verify.md
+branch_status: handled
+created_at: 2026-06-25
+verified_at: 2026-06-25
+archived: true
+handoff_context: openspec/changes/jarvis-desktop-gui/.comet/handoff/design-context.json
+handoff_hash: fdf520d4fba101cb6da16b5f2cb505d02a9c388947336c1bbf14bbde9208c617

@@ -10,6 +10,10 @@ from platforms.voice.audio import SileroAudioIO
 from platforms.voice.stt import WhisperSTT
 from platforms.voice.tts import EdgeTTS, TTSException
 from platforms.voice.wake import TwoStageWakeWord
+from gateway.events import (
+    wake_event, stt_event, thinking_event, text_chunk_event,
+    tts_start_event, tts_end_event, idle_event,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +40,26 @@ class VoicePlatform(BasePlatform):
 
         self._queue: asyncio.Queue = asyncio.Queue()
         self._speaking: bool = False
+        self._tauri_platform = None
+
+    # ── Tauri GUI 集成 ───────────────────────────────────
+
+    def set_tauri_platform(self, tauri_platform) -> None:
+        """设置 TauriPlatform 引用，用于 GUI 事件广播。"""
+        self._tauri_platform = tauri_platform
+
+    async def _broadcast(self, event: dict) -> None:
+        """向 Tauri GUI 广播事件。"""
+        if self._tauri_platform:
+            await self._tauri_platform.broadcast(event)
+
+    def get_text_chunk_callback(self):
+        """返回 on_text_chunk 回调，供 Gateway/AgentRunner 流式推送。"""
+        if self._tauri_platform is None:
+            return None
+        return lambda text: asyncio.create_task(
+            self._broadcast(text_chunk_event(text))
+        )
 
     # ── Lifecycle ───────────────────────────────────────
 
@@ -71,6 +95,9 @@ class VoicePlatform(BasePlatform):
             await self._speak(text)
         except TTSException as e:
             logger.error("TTS send error: %s", e)
+        finally:
+            # 交互完成，广播 idle
+            await self._broadcast(idle_event())
 
     # ── Listen loop ─────────────────────────────────────
 
@@ -86,6 +113,11 @@ class VoicePlatform(BasePlatform):
                 # Wake word → record command
                 text = await self._wake.wait_for_wake()
                 if text:
+                    # 唤醒 → 推 wake + stt 事件
+                    await self._broadcast(wake_event())
+                    await self._broadcast(stt_event(text))
+                    await self._broadcast(thinking_event())
+
                     await self._queue.put(Message(
                         platform=self.platform_name,
                         user_id=VOICE_USER_ID,
@@ -101,9 +133,11 @@ class VoicePlatform(BasePlatform):
 
     async def _speak(self, text: str) -> None:
         self._speaking = True
+        await self._broadcast(tts_start_event())
         try:
             mp3_bytes = await self._tts.synthesize(text)
             if mp3_bytes:
                 await self._audio.play(mp3_bytes)
         finally:
+            await self._broadcast(tts_end_event())
             self._speaking = False

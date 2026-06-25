@@ -1,0 +1,18 @@
+workflow: full
+phase: archive
+build_mode: executing-plans
+build_pause: null
+isolation: branch
+verify_mode: full
+base_ref: 23dcfe29a18ba50da29969c1285a162aebfbfe65
+design_doc: docs/superpowers/specs/2026-06-25-provider-streaming-refactor-design.md
+plan: docs/superpowers/plans/2026-06-25-provider-streaming-refactor.md
+verify_result: pass
+verification_report: docs/superpowers/reports/2026-06-25-provider-streaming-refactor-verify.md
+branch_status: handled
+created_at: 2026-06-25
+verified_at: 2026-06-25
+build_command: python -c "from agentd.providers.base import BaseProvider; from agentd.providers.anthropic import AnthropicProvider; from agentd.context.context import ContextGuard; from agentd.agent.runner import AgentRunner; print('Build OK')"
+archived: true
+handoff_context: openspec/changes/provider-streaming-refactor/.comet/handoff/design-context.json
+handoff_hash: 18a123730ffb6077c968e263f10dec121c313e478d49b7e028869e5de20af600
