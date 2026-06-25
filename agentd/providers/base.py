@@ -1,6 +1,7 @@
 """BaseProvider — LLM API 提供者抽象基类。"""
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 
@@ -33,6 +34,18 @@ class BaseProvider(ABC):
         **kwargs,
     ) -> Response:
         """发送消息并获取完整响应。"""
+        ...
+
+    @abstractmethod
+    async def chat_stream(
+        self,
+        messages: list[dict],
+        system: str | list,
+        tools: list[dict] | None = None,
+        on_text_chunk: Callable[[str], None] | None = None,
+        **kwargs,
+    ) -> Response:
+        """流式聊天 — 每收到 text chunk 调用 on_text_chunk，最终返回完整 Response。"""
         ...
 
     @abstractmethod
