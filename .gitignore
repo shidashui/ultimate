@@ -55,6 +55,11 @@ Thumbs.db
 *.log
 logs/
 
+# ── UI / Tauri / Vue ──────────────────────────────
+ui/node_modules/
+ui/src-tauri/target/
+ui/dist/
+
 # ── Misc ─────────────────────────────────────────
 *.tmp
 *.bak
