@@ -8,15 +8,21 @@ use tauri::{
     SystemTrayMenuItem,
 };
 
+use ws::WsState;
+
 #[tauri::command]
 fn close_window(window: tauri::Window) {
     let _ = window.hide();
 }
 
 #[tauri::command]
-fn send_input(text: String, handle: tauri::AppHandle) {
-    println!("[Input] {}", text);
-    let _ = handle.emit_all("tauri://user-input", &text);
+fn send_input(text: String, state: tauri::State<'_, WsState>) {
+    if let Ok(payload) = serde_json::to_string(&serde_json::json!({
+        "event": "input",
+        "text": text,
+    })) {
+        let _ = state.tx.try_send(payload);
+    }
 }
 
 fn main() {

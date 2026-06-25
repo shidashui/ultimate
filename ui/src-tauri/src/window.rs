@@ -1,5 +1,5 @@
 // ui/src-tauri/src/window.rs
-// Window management — full implementation in Task 6
+// Window management — show, hide, fade
 
 use tauri::Manager;
 
