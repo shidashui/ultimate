@@ -1,0 +1,16 @@
+{
+  "change": "jarvis-desktop-gui",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "fdf520d4fba101cb6da16b5f2cb505d02a9c388947336c1bbf14bbde9208c617",
+  "files": [
+    { "path": "openspec/changes/jarvis-desktop-gui/proposal.md", "sha256": "6a88c79e62ee5aab78d62ec374c1b1febe78f54f4584bcba8b1bd09b62670dd8" },
+    { "path": "openspec/changes/jarvis-desktop-gui/design.md", "sha256": "7cfb4343fae523a10cdaa7a63301135238db1b0721135c9882905455495cf29f" },
+    { "path": "openspec/changes/jarvis-desktop-gui/tasks.md", "sha256": "0811fd65753044b3a080f6adb0c068554adc0b982313b4bf122fe292084a4f37" },
+    { "path": "openspec/changes/jarvis-desktop-gui/specs/desktop-protocol/spec.md", "sha256": "757b3ff71d8fa7bebf804fdbf4174b85a09827361810832ca9f7a64b473384d8" },
+    { "path": "openspec/changes/jarvis-desktop-gui/specs/desktop-ui/spec.md", "sha256": "160b6aff300d681270dea13d84f8a16577a8d3b10b405e616a98e591eb05a026" },
+    { "path": "openspec/changes/jarvis-desktop-gui/specs/voice-core/spec.md", "sha256": "8b6c69f84716f79ed75ee6bb18a8c99b06b7c2a136b3a9c823e88cf0e2fb3a7f" }
+  ]
+}

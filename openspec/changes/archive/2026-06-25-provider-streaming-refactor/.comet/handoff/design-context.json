@@ -1,0 +1,15 @@
+{
+  "change": "provider-streaming-refactor",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "18a123730ffb6077c968e263f10dec121c313e478d49b7e028869e5de20af600",
+  "files": [
+    { "path": "openspec/changes/provider-streaming-refactor/proposal.md", "sha256": "1ff69ebb9b4c87710c5f6bb880ed8455d1b95359949b333530af61d7dac49a37" },
+    { "path": "openspec/changes/provider-streaming-refactor/design.md", "sha256": "f309d3cf91e13130e525d6f8e91bac3675553a98523e15649563dcd930a410f2" },
+    { "path": "openspec/changes/provider-streaming-refactor/tasks.md", "sha256": "67070eca7a92e67fd3b62fb406b097dbc4c9e1a31b3cf4de4744799abfed084b" },
+    { "path": "openspec/changes/provider-streaming-refactor/specs/base-provider/spec.md", "sha256": "67ec3d5934dc4f3e9515f390aaeb7cc89c9c65a9305475f4bcb19172e90ce6a0" },
+    { "path": "openspec/changes/provider-streaming-refactor/specs/provider-streaming/spec.md", "sha256": "bb157d6c070913ef97f792345fed1416aea8a7a329194b049431dfca17d535c2" }
+  ]
+}

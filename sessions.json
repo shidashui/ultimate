@@ -1,0 +1,26 @@
+{
+  "882eabb0cb8b": {
+    "label": "test_stream",
+    "created_at": "2026-06-25T06:27:06.247355+00:00",
+    "last_active": "2026-06-25T06:27:06.286008+00:00",
+    "message_count": 1
+  },
+  "90d488e598e3": {
+    "label": "test_stream2",
+    "created_at": "2026-06-25T06:27:44.777292+00:00",
+    "last_active": "2026-06-25T06:27:46.896078+00:00",
+    "message_count": 2
+  },
+  "2d38953d624e": {
+    "label": "test_oneshot",
+    "created_at": "2026-06-25T06:28:55.051231+00:00",
+    "last_active": "2026-06-25T06:28:58.944603+00:00",
+    "message_count": 2
+  },
+  "c960160c6bb4": {
+    "label": "test_stream3",
+    "created_at": "2026-06-25T06:28:59.133717+00:00",
+    "last_active": "2026-06-25T06:29:03.395140+00:00",
+    "message_count": 4
+  }
+}
