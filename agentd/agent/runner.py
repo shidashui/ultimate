@@ -1,5 +1,6 @@
 # agentd/agent/runner.py
 import logging
+from collections.abc import Callable
 from datetime import datetime, timezone
 from agentd.bootstrap import Container, set_current_container
 from agentd.context.session import SessionStore
@@ -150,11 +151,13 @@ class AgentRunner:
         messages: list[dict],
         store: SessionStore,
         channel: str = "terminal",
+        on_text_chunk: Callable[[str], None] | None = None,
     ) -> str:
         """
         返回 assistant 文本回复，出错返回空字符串。
 
         CLI 端通过 asyncio.run() 调用，Gateway 端直接 await。
+        on_text_chunk 不为 None 时走 streaming 路径，每收到文本块时回调。
         """
         set_current_container(self.container)
         try:
@@ -193,15 +196,22 @@ class AgentRunner:
             while budget.remaining > 0:
                 budget.consume()
 
-                # 预飞压缩：主动检查 token，超阈值先压缩
-                messages = await self.guard.preflight(self._cached_system_prompt, messages)
-
                 try:
-                    response = await self.guard.async_guard_api_call(
-                        system=self._cached_system_prompt,
-                        messages=messages,
-                        tools=self.container.tools,
-                    )
+                    if on_text_chunk is not None:
+                        response = await self.guard.async_guard_stream_call(
+                            system=self._cached_system_prompt,
+                            messages=messages,
+                            tools=self.container.tools,
+                            on_chunk=on_text_chunk,
+                        )
+                    else:
+                        # 预飞压缩：主动检查 token，超阈值先压缩
+                        messages = await self.guard.preflight(self._cached_system_prompt, messages)
+                        response = await self.guard.async_guard_api_call(
+                            system=self._cached_system_prompt,
+                            messages=messages,
+                            tools=self.container.tools,
+                        )
                     last_response = response
                 except ProviderError as exc:
                     # 不可恢复错误 — 明确报错给用户

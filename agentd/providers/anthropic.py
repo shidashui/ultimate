@@ -73,7 +73,7 @@ class AnthropicProvider(BaseProvider):
                 if on_text_chunk and text:
                     on_text_chunk(text)
 
-        final = stream.get_final_message()
+        final = await stream.get_final_message()
         return self._normalize_response(final)
 
     def estimate_tokens(self, text: str) -> int:
