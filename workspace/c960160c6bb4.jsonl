@@ -1,4 +1,0 @@
-{"type": "user", "content": "say hello", "ts": 1782368939.137764}
-{"type": "assistant", "content": [{"type": "tool_use", "id": "call_00_l5swQFahXD8m3WQI6o5d3706", "name": "skill_invoke", "input": {"name": "hello-skill", "args": ""}}], "ts": 1782368942.280711}
-{"type": "tool_result", "tool_use_id": "call_00_l5swQFahXD8m3WQI6o5d3706", "content": "# Hello Skill\n\n## 指令\n\n当用户调用此 skill 时，输出一句问候语，包含 \"Hello\" 字样，并告知用户是通过 skill 调用的。", "ts": 1782368942.2871885}
-{"type": "assistant", "content": [{"type": "text", "text": "Hello. —— via hello-skill。"}], "ts": 1782368943.3932538}
