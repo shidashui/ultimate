@@ -2,6 +2,7 @@
 change: voice-platform-full-diag
 design-doc: docs/superpowers/specs/2026-06-26-voice-platform-full-diag-design.md
 base-ref: b5edc5a15b01e5b13d143b2afcf46d78e0d854f2
+archived-with: 2026-06-26-voice-platform-full-diag
 ---
 
 # Voice Platform Full-Chain Fix — Implementation Plan
@@ -22,6 +23,7 @@ base-ref: b5edc5a15b01e5b13d143b2afcf46d78e0d854f2
 - All new config fields must have sensible defaults (backward compatible)
 - Status events must not crash the platform if broadcast fails (catch + log debug)
 
+archived-with: 2026-06-26-voice-platform-full-diag
 ---
 
 ### Task 1: VoiceConfig Extension + config.yaml
@@ -112,6 +114,7 @@ git add config/configs.py config.yaml
 git commit -m "feat(voice): add stt_beam_size, stt_vad_filter, silero_download_timeout, stt_model_warmup, status_verbose to VoiceConfig"
 ```
 
+archived-with: 2026-06-26-voice-platform-full-diag
 ---
 
 ### Task 2: Status Events Factory
@@ -162,6 +165,7 @@ git add gateway/events.py
 git commit -m "feat(voice): add status_event factory for voice platform progress feedback"
 ```
 
+archived-with: 2026-06-26-voice-platform-full-diag
 ---
 
 ### Task 3: STT Optimization (beam_size, vad_filter, warmup, status callback)
@@ -295,6 +299,7 @@ git add platforms/voice/stt.py
 git commit -m "feat(voice): add status_callback, warmup(), config-driven beam_size/vad_filter to WhisperSTT"
 ```
 
+archived-with: 2026-06-26-voice-platform-full-diag
 ---
 
 ### Task 4: Audio I/O — Silero Warmup + Fallback + Status Callback
@@ -531,6 +536,7 @@ git add platforms/voice/audio.py
 git commit -m "feat(voice): add warmup_silero(), _vad_available fallback, status_callback to SileroAudioIO"
 ```
 
+archived-with: 2026-06-26-voice-platform-full-diag
 ---
 
 ### Task 5: Smart Command Separation + Wake Word Optimization
@@ -661,6 +667,7 @@ git add platforms/voice/wake.py
 git commit -m "feat(voice): smart command separation in TwoStageWakeWord — extract inline cmd, 8s fallback"
 ```
 
+archived-with: 2026-06-26-voice-platform-full-diag
 ---
 
 ### Task 6: VoicePlatform Orchestrator — Warmup + Event-Driven + Status Broadcast
@@ -874,6 +881,7 @@ git add platforms/voice/platform.py
 git commit -m "feat(voice): warmup orchestration, event-driven listen loop, unified _broadcast_status in VoicePlatform"
 ```
 
+archived-with: 2026-06-26-voice-platform-full-diag
 ---
 
 ### Task 7: Tests — Warmup, Separation, Fallback, Status Events
@@ -1091,6 +1099,7 @@ git add tests/test_voice_platform.py
 git commit -m "test(voice): add tests for status events, config, command separation, silero fallback"
 ```
 
+archived-with: 2026-06-26-voice-platform-full-diag
 ---
 
 ### Integration Verification (Manual)

@@ -2,6 +2,8 @@
 comet_change: voice-platform-full-diag
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-06-26-voice-platform-full-diag
+status: final
 ---
 
 # Voice Platform Full-Chain Fix — Technical Design
