@@ -178,6 +178,9 @@ class VoicePlatform(BasePlatform):
             mp3_bytes = await self._tts.synthesize(text)
             if mp3_bytes:
                 await self._audio.play(mp3_bytes)
+        except Exception as e:
+            logger.error("TTS/playback error: %s", e)
+            await self._broadcast_status("error", "语音播报失败，请检查音频设备")
         finally:
             await self._broadcast(tts_end_event())
             self._speaking = False

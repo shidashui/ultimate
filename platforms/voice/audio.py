@@ -193,11 +193,8 @@ class SileroAudioIO(AudioIOProtocol):
 
     @staticmethod
     def _play_sync(audio_bytes: bytes, sample_rate: int) -> None:
-        try:
-            import soundfile as sf
+        import soundfile as sf
 
-            audio, sr = sf.read(io.BytesIO(audio_bytes))
-            sd.play(audio, sr)
-            sd.wait()
-        except Exception as e:
-            logger.error(f"Playback error: {e}")
+        audio, sr = sf.read(io.BytesIO(audio_bytes))
+        sd.play(audio, sr)
+        sd.wait()
