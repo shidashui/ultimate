@@ -12,6 +12,7 @@ EVENT_TTS_START = "tts_start"
 EVENT_TTS_END = "tts_end"
 EVENT_IDLE = "idle"
 EVENT_ERROR = "error"
+EVENT_STATUS = "status"
 
 # ── 前端 → 后端 ──
 EVENT_INPUT = "input"
@@ -57,3 +58,11 @@ def idle_event() -> dict:
 
 def error_event(reason: str) -> dict:
     return {"event": EVENT_ERROR, "reason": reason}
+
+
+def status_event(stage: str, detail: str = "") -> dict:
+    """Voice platform status event for GUI progress feedback.
+
+    Stages: loading, listening, transcribing, thinking, speaking, idle, error
+    """
+    return {"event": EVENT_STATUS, "stage": stage, "detail": detail}
