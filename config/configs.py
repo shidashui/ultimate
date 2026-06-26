@@ -76,6 +76,7 @@ class VoiceConfig:
     silero_download_timeout: int = 15
     stt_model_warmup: bool = True
     status_verbose: bool = True
+    tts_retry_count: int = 3
 
 
 @dataclass
@@ -228,6 +229,7 @@ def load_config(path: str | Path | None = None) -> Config:
         silero_download_timeout=int(voice_raw.get("silero_download_timeout", 15)),
         stt_model_warmup=bool(voice_raw.get("stt_model_warmup", True)),
         status_verbose=bool(voice_raw.get("status_verbose", True)),
+        tts_retry_count=int(voice_raw.get("tts_retry_count", 3)),
     )
 
     workdir = config_path.parent

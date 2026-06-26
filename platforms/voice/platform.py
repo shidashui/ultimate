@@ -132,6 +132,7 @@ class VoicePlatform(BasePlatform):
             await self._speak(text)
         except TTSException as e:
             logger.error("TTS send error: %s", e)
+            await self._broadcast_status("error", "语音合成失败，请稍后重试")
         finally:
             # 交互完成，广播 idle
             await self._broadcast(idle_event())
