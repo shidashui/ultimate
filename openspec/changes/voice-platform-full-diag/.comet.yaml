@@ -1,14 +1,14 @@
 workflow: full
-phase: build
+phase: verify
 build_mode: executing-plans
 build_pause: null
 isolation: branch
-verify_mode: null
+verify_mode: full
 base_ref: b5edc5a15b01e5b13d143b2afcf46d78e0d854f2
 design_doc: docs/superpowers/specs/2026-06-26-voice-platform-full-diag-design.md
 plan: docs/superpowers/plans/2026-06-26-voice-platform-full-diag.md
 verify_result: pending
-verification_report: null
+verification_report: docs/superpowers/reports/2026-06-26-voice-platform-full-diag-verify.md
 branch_status: pending
 created_at: 2026-06-26
 verified_at: null
