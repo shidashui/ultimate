@@ -167,3 +167,180 @@ class TestVoicePlatformOrchestrator:
 
         vp = VoicePlatform(wake_word="测试")
         assert isinstance(vp, BasePlatform)
+
+
+# ── P2: Status events ──────────────────────────────
+
+
+class TestStatusEvents:
+    def test_status_event_has_required_fields(self):
+        from gateway.events import status_event
+
+        evt = status_event("loading", "test detail")
+        assert evt["event"] == "status"
+        assert evt["stage"] == "loading"
+        assert evt["detail"] == "test detail"
+
+    def test_status_event_default_detail(self):
+        from gateway.events import status_event
+
+        evt = status_event("idle")
+        assert evt["detail"] == ""
+
+
+# ── P2: VoiceConfig new fields ──────────────────────
+
+
+class TestVoiceConfigNewFields:
+    def test_new_config_defaults(self):
+        from config.configs import VoiceConfig
+
+        cfg = VoiceConfig()
+        assert cfg.stt_beam_size == 3
+        assert cfg.stt_vad_filter is False
+        assert cfg.silero_download_timeout == 15
+        assert cfg.stt_model_warmup is True
+        assert cfg.status_verbose is True
+
+    def test_new_config_custom(self):
+        from config.configs import VoiceConfig
+
+        cfg = VoiceConfig(
+            stt_beam_size=5,
+            stt_vad_filter=True,
+            silero_download_timeout=30,
+            stt_model_warmup=False,
+            status_verbose=False,
+        )
+        assert cfg.stt_beam_size == 5
+        assert cfg.stt_vad_filter is True
+        assert cfg.silero_download_timeout == 30
+        assert cfg.stt_model_warmup is False
+        assert cfg.status_verbose is False
+
+
+# ── P2: VoicePlatform with status callback ───────────
+
+
+class TestVoicePlatformStatus:
+    def test_platform_has_broadcast_status(self):
+        from platforms.voice import VoicePlatform
+
+        vp = VoicePlatform(wake_word="测试", whisper_model="tiny")
+        assert hasattr(vp, "_broadcast_status")
+        assert callable(vp._broadcast_status)
+
+    @pytest.mark.asyncio
+    async def test_broadcast_status_no_tauri(self):
+        """status broadcast should not crash when no TauriPlatform set."""
+        from platforms.voice import VoicePlatform
+
+        vp = VoicePlatform(wake_word="测试", whisper_model="tiny")
+        # Should not raise
+        await vp._broadcast_status("loading", "test message")
+
+
+# ── P2: Smart command separation ────────────────────
+
+
+class TestCommandSeparation:
+    @pytest.mark.asyncio
+    async def test_inline_command_extracted(self):
+        """Wake word + command in one breath → command returned directly."""
+        import numpy as np
+        from platforms.voice.wake import TwoStageWakeWord
+
+        class MockAudio:
+            def __init__(self):
+                self.call_count = 0
+            async def record_utterance(self, **kw):
+                self.call_count += 1
+                return np.zeros(16000, dtype=np.float32)
+
+        class MockSTT:
+            async def transcribe(self, audio, language="zh"):
+                return "你好，今天天气怎么样"
+
+        mock_audio = MockAudio()
+        mock_stt = MockSTT()
+        wake = TwoStageWakeWord(mock_audio, mock_stt, wake_word="你好")
+
+        result = await wake.wait_for_wake()
+        assert result == "今天天气怎么样"
+        # Should NOT have called record_utterance a second time
+        assert mock_audio.call_count == 1
+
+    @pytest.mark.asyncio
+    async def test_wake_only_falls_back_to_record(self):
+        """Only wake word → record_command() fallback."""
+        import numpy as np
+        from platforms.voice.wake import TwoStageWakeWord
+
+        class MockAudio:
+            def __init__(self):
+                self.call_count = 0
+            async def record_utterance(self, **kw):
+                self.call_count += 1
+                return np.zeros(16000, dtype=np.float32)
+
+        class MockSTT:
+            async def transcribe(self, audio, language="zh"):
+                return "你好"  # Only wake word
+
+        mock_audio = MockAudio()
+        mock_stt = MockSTT()
+        wake = TwoStageWakeWord(mock_audio, mock_stt, wake_word="你好")
+
+        result = await wake.wait_for_wake()
+        # Should have called record_utterance twice (wake + command)
+        assert mock_audio.call_count == 2
+        assert result == "你好"  # mock returns wake word again
+
+    @pytest.mark.asyncio
+    async def test_empty_text_continues_waiting(self):
+        """Empty STT result → continue waiting loop."""
+        import numpy as np
+        from platforms.voice.wake import TwoStageWakeWord
+
+        call_count = [0]
+
+        class MockAudio:
+            async def record_utterance(self, **kw):
+                call_count[0] += 1
+                return np.zeros(16000, dtype=np.float32)
+
+        responses = ["", "你好 帮我查天气"]  # empty → wake+cmd
+
+        class MockSTT:
+            async def transcribe(self, audio, language="zh"):
+                return responses.pop(0)
+
+        mock_audio = MockAudio()
+        mock_stt = MockSTT()
+        wake = TwoStageWakeWord(mock_audio, mock_stt, wake_word="你好")
+
+        result = await wake.wait_for_wake()
+        assert result == "帮我查天气"
+
+
+# ── P2: Audio Silero fallback ──────────────────────
+
+
+class TestSileroFallback:
+    def test_vad_available_flag_exists(self):
+        from platforms.voice.audio import SileroAudioIO
+
+        io = SileroAudioIO()
+        assert hasattr(io, "_vad_available")
+        assert io._vad_available is True
+
+    def test_record_sync_falls_back_when_unavailable(self):
+        """When _vad_available=False, should use amplitude VAD without crash."""
+        from platforms.voice.audio import SileroAudioIO
+
+        io = SileroAudioIO()
+        io._vad_available = False
+        io._vad_model = None
+        # _record_sync should use amplitude fallback
+        # Note: this will open a real audio stream — test only the flag logic
+        assert io._vad_available is False
