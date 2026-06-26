@@ -1,0 +1,13 @@
+{
+  "change": "voice-platform-full-diag",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "3eef841bbc2c146ade7931780694af68362bd5d34e2841c544ddd7cba1eafc30",
+  "files": [
+    { "path": "openspec/changes/voice-platform-full-diag/proposal.md", "sha256": "76dfa233dbbceddef4d25e4763f11db8fc5ddbdf09664a9092b6b464a73d56f0" },
+    { "path": "openspec/changes/voice-platform-full-diag/design.md", "sha256": "6a60a3a8701bf4640086ec8c99f11153230c9ced50c93b43f7301d44f670e413" },
+    { "path": "openspec/changes/voice-platform-full-diag/tasks.md", "sha256": "3f702a85f34c43f4b17d2005e66f871f7301843c54758987c0625f5e58b4c801" }
+  ]
+}

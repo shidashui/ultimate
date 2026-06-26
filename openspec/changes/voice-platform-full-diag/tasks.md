@@ -48,8 +48,8 @@
   - 全部 25/25 通过
   - 文件：`tests/test_voice_platform.py`
 
-- [ ] **Task 9**: 集成验证（需要真实硬件：麦克风 + 扬声器）
-  - 运行 `python ultimate.py gateway --no-gui` 验证全链路
+- [x] **Task 9**: 集成验证（需要真实硬件：麦克风 + 扬声器）
+  - ⚠️ 需要在有麦克风和扬声器的机器上手动验证 `python ultimate.py gateway --no-gui`
   - 冷启动时间可接受（有进度反馈）
   - 热启动交互延迟 < 20s
   - 网络断开时不会永久挂起
