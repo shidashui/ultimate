@@ -70,6 +70,12 @@ class VoiceConfig:
     sample_rate: int = 16000
     max_record_secs: int = 30
     tts_voice: str = "zh-CN-XiaoxiaoNeural"
+    # 新增
+    stt_beam_size: int = 3
+    stt_vad_filter: bool = False
+    silero_download_timeout: int = 15
+    stt_model_warmup: bool = True
+    status_verbose: bool = True
 
 
 @dataclass
@@ -217,6 +223,11 @@ def load_config(path: str | Path | None = None) -> Config:
         sample_rate=int(voice_raw.get("sample_rate", 16000)),
         max_record_secs=int(voice_raw.get("max_record_secs", 30)),
         tts_voice=voice_raw.get("tts_voice", "zh-CN-XiaoxiaoNeural"),
+        stt_beam_size=int(voice_raw.get("stt_beam_size", 3)),
+        stt_vad_filter=bool(voice_raw.get("stt_vad_filter", False)),
+        silero_download_timeout=int(voice_raw.get("silero_download_timeout", 15)),
+        stt_model_warmup=bool(voice_raw.get("stt_model_warmup", True)),
+        status_verbose=bool(voice_raw.get("status_verbose", True)),
     )
 
     workdir = config_path.parent

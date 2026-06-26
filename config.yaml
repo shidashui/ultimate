@@ -8,8 +8,8 @@ model:
     - name: deepseek
       model: deepseek-v4-flash
       base_url: https://api.deepseek.com/anthropic
-      api_key: "sk-283d814ecac64e0c93d196f88327d69f"  # 可选，优先级低于 api_key_env
-      api_key_env: DEEPSEEK_API_KEY
+      api_key: ""  # 可选，优先级低于 api_key_env
+      api_key_env: ANTHROPIC_AUTH_TOKEN
 
 # ── Toolsets: 工具集开关 ─────────────────────────────────────
 toolsets:
@@ -56,3 +56,8 @@ voice:
   sample_rate: 16000
   max_record_secs: 30
   tts_voice: zh-CN-XiaoxiaoNeural
+  stt_beam_size: 3
+  stt_vad_filter: false
+  silero_download_timeout: 15
+  stt_model_warmup: true
+  status_verbose: true
