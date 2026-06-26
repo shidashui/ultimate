@@ -5,6 +5,7 @@ import asyncio
 import collections
 import io
 import logging
+from typing import Callable, Awaitable
 
 import numpy as np
 import sounddevice as sd
@@ -24,11 +25,58 @@ NUM_PADDING = PADDING_MS // FRAME_MS  # ~13 frames
 class SileroAudioIO(AudioIOProtocol):
     """Audio I/O with Silero-VAD endpoint detection."""
 
-    def __init__(self, sample_rate: int | None = None, vad_threshold: float | None = None):
+    def __init__(
+        self,
+        sample_rate: int | None = None,
+        vad_threshold: float | None = None,
+        status_callback: Callable[[str, str], Awaitable[None]] | None = None,
+    ):
         cfg = get_config().voice
         self.sample_rate = sample_rate or cfg.sample_rate
         self.vad_threshold = vad_threshold or cfg.vad_threshold
-        self._vad_model = None  # lazy loaded
+        self._vad_model = None  # lazy loaded: (model, utils) tuple
+        self._vad_available = True  # set False if warmup fails
+        self._status = status_callback
+
+    async def _notify(self, stage: str, detail: str = "") -> None:
+        if self._status:
+            try:
+                await self._status(stage, detail)
+            except Exception:
+                logger.debug("status callback error", exc_info=True)
+
+    async def warmup_silero(self, timeout: float = 15.0) -> bool:
+        """Preload Silero VAD model with timeout. Returns True on success."""
+        loop = asyncio.get_event_loop()
+        await self._notify("loading", "正在加载语音检测模型…")
+        try:
+            await asyncio.wait_for(
+                loop.run_in_executor(None, self._load_silero),
+                timeout=timeout,
+            )
+            await self._notify("loading", "语音检测模型就绪")
+            return True
+        except asyncio.TimeoutError:
+            logger.warning("Silero VAD warmup timed out, falling back to amplitude VAD")
+            self._vad_available = False
+            await self._notify("loading", "语音检测模型超时，降级到振幅检测")
+            return False
+        except Exception as e:
+            logger.warning("Silero VAD warmup failed: %s, falling back to amplitude VAD", e)
+            self._vad_available = False
+            await self._notify("loading", "语音检测模型不可用，降级到振幅检测")
+            return False
+
+    def _load_silero(self) -> None:
+        """Load Silero VAD model (runs in executor)."""
+        import torch
+
+        model, utils = torch.hub.load(
+            repo_or_dir="snakers4/silero-vad",
+            model="silero_vad",
+            force_reload=False,
+        )
+        self._vad_model = (model, utils)
 
     async def record_utterance(
         self, vad_threshold: float = 0.5, max_secs: int = 30
@@ -41,19 +89,20 @@ class SileroAudioIO(AudioIOProtocol):
         )
 
     def _record_sync(self, threshold: float, max_secs: int) -> np.ndarray | None:
-        """Synchronous recording with Silero VAD (runs in executor)."""
-        try:
-            import torch
+        """Synchronous recording — Silero VAD if available, amplitude fallback."""
+        if self._vad_available and self._vad_model is not None:
+            try:
+                return self._record_silero_sync(threshold, max_secs)
+            except Exception:
+                logger.warning("Silero VAD error, falling back to amplitude", exc_info=True)
+        return self._record_amplitude_sync(max_secs)
 
-            model, utils = torch.hub.load(
-                repo_or_dir="snakers4/silero-vad",
-                model="silero_vad",
-                force_reload=False,
-            )
-            (get_speech_timestamps, _, _, _, _) = utils
-        except Exception:
-            # Fallback: use amplitude-based VAD
-            return self._record_amplitude_sync(max_secs)
+    def _record_silero_sync(self, threshold: float, max_secs: int) -> np.ndarray | None:
+        """Silero-based VAD recording."""
+        import torch
+
+        model, utils = self._vad_model
+        (get_speech_timestamps, _, _, _, _) = utils
 
         ring = collections.deque(maxlen=NUM_PADDING)
         triggered = False
@@ -84,11 +133,11 @@ class SileroAudioIO(AudioIOProtocol):
                         pcm_buf.pop(0)
                     if sum(ring) / len(ring) >= 0.75:
                         triggered = True
-                        logger.debug("VAD: speech start (threshold=%.2f)", threshold)
+                        logger.debug("Silero VAD: speech start (threshold=%.2f)", threshold)
                 else:
                     pcm_buf.append(pcm)
                     if sum(ring) / len(ring) < 0.25:
-                        logger.debug("VAD: speech end")
+                        logger.debug("Silero VAD: speech end")
                         break
 
         if not triggered:
