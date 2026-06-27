@@ -106,45 +106,60 @@ class SileroAudioIO(AudioIOProtocol):
 
         ring = collections.deque(maxlen=NUM_PADDING)
         triggered = False
-        pcm_buf: list[bytes] = []
-        max_frames = int(max_secs * 1000 / FRAME_MS)
+        pcm_buf: list[np.ndarray] = []  # float32 arrays, one per VAD frame
+        max_frame_count = int(max_secs * 1000 / FRAME_MS)
+        frame_count = 0
+
+        # Accumulator: blocksize=0 may return chunks ≠ FRAME_SIZE (e.g. 640).
+        # Buffer them and feed exactly FRAME_SIZE samples to the Silero model.
+        sample_acc = np.array([], dtype=np.float32)
 
         with sd.RawInputStream(
             samplerate=self.sample_rate,
             channels=1,
             dtype="int16",
-            blocksize=0,  # auto: PortAudio picks WASAPI-friendly buffer; read(512) accumulates
+            blocksize=0,  # auto: PortAudio picks WASAPI-friendly buffer
         ) as stream:
-            for _ in range(max_frames):
+            while frame_count < max_frame_count:
                 raw, _ = stream.read(FRAME_SIZE)
-                pcm = bytes(raw)
-                audio_chunk = (
+                chunk = (
                     np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
                 )
-                speech_prob = model(
-                    torch.from_numpy(audio_chunk), self.sample_rate
-                ).item()
-                is_speech = speech_prob > threshold
-                ring.append(is_speech)
+                sample_acc = np.concatenate([sample_acc, chunk])
 
-                if not triggered:
-                    pcm_buf.append(pcm)
-                    if len(pcm_buf) > NUM_PADDING:
-                        pcm_buf.pop(0)
-                    if sum(ring) / len(ring) >= 0.75:
-                        triggered = True
-                        logger.debug("Silero VAD: speech start (threshold=%.2f)", threshold)
-                else:
-                    pcm_buf.append(pcm)
-                    if sum(ring) / len(ring) < 0.25:
-                        logger.debug("Silero VAD: speech end")
-                        break
+                while len(sample_acc) >= FRAME_SIZE and frame_count < max_frame_count:
+                    vad_chunk = sample_acc[:FRAME_SIZE]
+                    sample_acc = sample_acc[FRAME_SIZE:]
+
+                    speech_prob = model(
+                        torch.from_numpy(vad_chunk), self.sample_rate
+                    ).item()
+                    is_speech = speech_prob > threshold
+                    ring.append(is_speech)
+
+                    if not triggered:
+                        pcm_buf.append(vad_chunk)
+                        if len(pcm_buf) > NUM_PADDING:
+                            pcm_buf.pop(0)
+                        if sum(ring) / len(ring) >= 0.75:
+                            triggered = True
+                            logger.debug(
+                                "Silero VAD: speech start (threshold=%.2f)", threshold
+                            )
+                    else:
+                        pcm_buf.append(vad_chunk)
+                        if sum(ring) / len(ring) < 0.25:
+                            logger.debug("Silero VAD: speech end")
+                            break
+                    frame_count += 1
+
+                if triggered and sum(ring) / len(ring) < 0.25:
+                    break
 
         if not triggered:
             return None
 
-        raw_bytes = b"".join(pcm_buf)
-        audio = np.frombuffer(raw_bytes, dtype=np.int16).astype(np.float32) / 32768.0
+        audio = np.concatenate(pcm_buf)
         return audio if len(audio) > self.sample_rate * 0.3 else None
 
     def _record_amplitude_sync(self, max_secs: int) -> np.ndarray | None:
