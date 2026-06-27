@@ -16,8 +16,8 @@ from platforms.voice.protocols import AudioIOProtocol
 logger = logging.getLogger(__name__)
 
 DEFAULT_SAMPLE_RATE = 16000
-FRAME_MS = 32  # Silero requires >= 512 samples (16000/512 = 31.25)
-FRAME_SIZE = int(DEFAULT_SAMPLE_RATE * FRAME_MS / 1000)  # 480 samples
+FRAME_MS = 40  # Silero requires >= 512 samples; 640 aligns with WASAPI 10ms chunks (4×160)
+FRAME_SIZE = int(DEFAULT_SAMPLE_RATE * FRAME_MS / 1000)  # 640 samples
 PADDING_MS = 400
 NUM_PADDING = PADDING_MS // FRAME_MS  # ~13 frames
 
