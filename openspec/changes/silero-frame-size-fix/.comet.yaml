@@ -1,5 +1,5 @@
 workflow: hotfix
-phase: build
+phase: verify
 build_mode: direct
 build_pause: null
 isolation: branch
