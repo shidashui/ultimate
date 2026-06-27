@@ -1,0 +1,17 @@
+workflow: hotfix
+phase: build
+build_mode: direct
+build_pause: null
+isolation: branch
+verify_mode: light
+base_ref: 6741a3057a087762998b19aa7b2b0fd56b71d64c
+design_doc: null
+plan: null
+verify_result: pending
+verification_report: null
+branch_status: pending
+created_at: 2026-06-27
+verified_at: null
+archived: false
+build_command: python -m pytest tests/test_voice_platform.py -q
+direct_override: true

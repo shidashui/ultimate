@@ -58,7 +58,7 @@ voice:
   tts_voice: zh-CN-XiaoxiaoNeural
   stt_beam_size: 3
   stt_vad_filter: false
-  silero_download_timeout: 15
+  silero_download_timeout: 60
   stt_model_warmup: true
   status_verbose: true
   tts_retry_count: 3

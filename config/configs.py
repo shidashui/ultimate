@@ -73,7 +73,7 @@ class VoiceConfig:
     # 新增
     stt_beam_size: int = 3
     stt_vad_filter: bool = False
-    silero_download_timeout: int = 15
+    silero_download_timeout: int = 60
     stt_model_warmup: bool = True
     status_verbose: bool = True
     tts_retry_count: int = 3
