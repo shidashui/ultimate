@@ -198,7 +198,7 @@ class TestVoiceConfigNewFields:
         cfg = VoiceConfig()
         assert cfg.stt_beam_size == 3
         assert cfg.stt_vad_filter is False
-        assert cfg.silero_download_timeout == 15
+        assert cfg.silero_download_timeout == 60
         assert cfg.stt_model_warmup is True
         assert cfg.status_verbose is True
 
