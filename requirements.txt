@@ -3,3 +3,4 @@ anthropic
 rich
 prompt_toolkit
 soundfile
+torchaudio
