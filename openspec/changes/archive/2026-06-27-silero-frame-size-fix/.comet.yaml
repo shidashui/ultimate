@@ -1,5 +1,5 @@
 workflow: hotfix
-phase: verify
+phase: archive
 build_mode: direct
 build_pause: null
 isolation: branch
@@ -7,11 +7,11 @@ verify_mode: light
 base_ref: 4e7f400af45d18408c387c73296cb297d9ef4ac9
 design_doc: null
 plan: null
-verify_result: pending
-verification_report: null
-branch_status: pending
+verify_result: pass
+verification_report: docs/superpowers/reports/2026-06-27-silero-frame-size-fix-verify.md
+branch_status: handled
 created_at: 2026-06-27
-verified_at: null
-archived: false
+verified_at: 2026-06-27
+archived: true
 build_command: python -m pytest tests/test_voice_platform.py -q
 direct_override: true
