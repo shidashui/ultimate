@@ -1,0 +1,15 @@
+workflow: hotfix
+phase: archive
+build_mode: direct
+build_pause: null
+isolation: branch
+verify_mode: light
+base_ref: 9ba4a466514d2bcef6a75ef5f41f6ecc5c644eb2
+design_doc: null
+plan: null
+verify_result: pass
+verification_report: docs/superpowers/reports/2026-06-28-fix-silero-vad-blocksize-mismatch-verify.md
+branch_status: handled
+created_at: 2026-06-27
+verified_at: 2026-06-28
+archived: true
