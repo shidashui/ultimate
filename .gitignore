@@ -32,6 +32,8 @@ workspace/memory/daily/
 *.onnx
 *.weights
 checkpoints/
+models/whisper/*
+!models/whisper/.gitkeep
 
 # ── OS Files ─────────────────────────────────────
 .DS_Store

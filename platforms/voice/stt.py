@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import io
 import logging
+from pathlib import Path
 from typing import Callable, Awaitable
 
 import numpy as np
@@ -15,6 +16,20 @@ from platforms.voice.protocols import STTProtocol
 logger = logging.getLogger(__name__)
 
 SAMPLE_RATE = 16000
+
+# Local model directory: models/whisper/<model_size>/
+LOCAL_MODEL_DIR = Path(__file__).resolve().parents[2] / "models" / "whisper"
+
+
+def _resolve_model_path(model_size: str) -> str:
+    """Return local model path if available, otherwise model_size name."""
+    local_path = LOCAL_MODEL_DIR / model_size
+    marker = local_path / ".model_ready"
+    if local_path.is_dir() and marker.is_file():
+        logger.info("Using local Whisper model: %s", local_path)
+        return str(local_path)
+    logger.info("Whisper model from HuggingFace (cache): %s", model_size)
+    return model_size
 
 
 class WhisperSTT(STTProtocol):
@@ -40,12 +55,13 @@ class WhisperSTT(STTProtocol):
                 logger.debug("status callback error", exc_info=True)
 
     def _get_model(self):
-        """Lazy-load WhisperModel."""
+        """Lazy-load WhisperModel (local path preferred, fallback HuggingFace)."""
         if self._model is None:
             from faster_whisper import WhisperModel
 
+            model_path = _resolve_model_path(self.model_size)
             self._model = WhisperModel(
-                self.model_size,
+                model_path,
                 device="cpu",
                 compute_type="int8",
             )

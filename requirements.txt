@@ -4,3 +4,4 @@ rich
 prompt_toolkit
 soundfile
 torchaudio
+huggingface-hub>=0.20.0
