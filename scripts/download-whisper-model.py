@@ -42,15 +42,13 @@ def download_model(model_size: str) -> Path:
     snapshot_download(
         repo_id=repo_id,
         local_dir=str(local_dir),
-        local_dir_use_symlinks=False,
-        resume_download=True,
         ignore_patterns=["*.h5", "*.ot"],
     )
 
     # Write marker file
     marker = local_dir / ".model_ready"
     marker.write_text(f"model={model_size}\nsource={repo_id}\n")
-    print(f"✓ {model_size} model ready at {local_dir}")
+    print(f"[OK] {model_size} model ready at {local_dir}")
     return local_dir
 
 
@@ -60,27 +58,27 @@ def check_model(model_size: str) -> bool:
     marker = local_dir / ".model_ready"
 
     if not local_dir.is_dir():
-        print(f"✗ {model_size}: directory not found at {local_dir}")
+        print(f"[FAIL] {model_size}: directory not found at {local_dir}")
         return False
     if not marker.is_file():
-        print(f"✗ {model_size}: .model_ready marker missing (incomplete download)")
+        print(f"[FAIL] {model_size}: .model_ready marker missing (incomplete download)")
         return False
 
     # Check essential files exist
     required = ["model.bin", "config.json", "tokenizer.json"]
     missing = [f for f in required if not (local_dir / f).is_file()]
     if missing:
-        print(f"✗ {model_size}: missing files: {', '.join(missing)}")
+        print(f"[FAIL] {model_size}: missing files: {', '.join(missing)}")
         return False
 
     # Rough size check: model.bin should be > 10MB
     model_bin = local_dir / "model.bin"
     size_mb = model_bin.stat().st_size / (1024 * 1024)
     if size_mb < 10:
-        print(f"✗ {model_size}: model.bin too small ({size_mb:.1f} MB)")
+        print(f"[FAIL] {model_size}: model.bin too small ({size_mb:.1f} MB)")
         return False
 
-    print(f"✓ {model_size}: {size_mb:.0f} MB, all files present")
+    print(f"[OK] {model_size}: {size_mb:.0f} MB, all files present")
     return True
 
 
@@ -116,7 +114,7 @@ def main():
             try:
                 download_model(size)
             except Exception as e:
-                print(f"✗ {size}: download failed: {e}")
+                print(f"[FAIL] {size}: download failed: {e}")
                 all_ok = False
 
     sys.exit(0 if all_ok else 1)

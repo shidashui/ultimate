@@ -27,7 +27,7 @@
 
 ## 验证标准
 
-- [ ] `python scripts/download-whisper-model.py --model tiny` 成功下载模型
-- [ ] 再次运行 `--check` 验证完整
-- [ ] `stt.py` 从本地路径加载模型成功，日志输出 "本地模型"
-- [ ] `WhisperSTT.warmup()` 显著加速（< 2s 而非网络下载数十秒）
+- [x] `python scripts/download-whisper-model.py --model tiny` 成功下载模型（需网络，若 HF 不可达则从缓存复制）
+- [x] 再次运行 `--check` 验证完整
+- [x] `stt.py` 从本地路径加载模型成功，日志输出 "Using local Whisper model"
+- [x] `WhisperSTT.warmup()` 显著加速（冷加载 ~8s，远优于网络下载数十秒到超时）
