@@ -44,8 +44,16 @@ pub fn connect(url: String, handle: AppHandle) {
 
                                             match event_type {
                                                 "wake" => {
-                                                    let _ = handle.get_window("main").map(|w| w.show());
-                                                    let _ = handle.get_window("main").map(|w| w.set_focus());
+                                                    if let Some(window) = handle.get_window("main") {
+                                                        if let Err(e) = window.show() {
+                                                            eprintln!("[WS] Failed to show window: {}", e);
+                                                        }
+                                                        if let Err(e) = window.set_focus() {
+                                                            eprintln!("[WS] Failed to focus window: {}", e);
+                                                        }
+                                                    } else {
+                                                        eprintln!("[WS] 'main' window not found on wake");
+                                                    }
                                                     let _ = handle.emit_all("tauri://wake", &payload);
                                                 }
                                                 "stt"          => { let _ = handle.emit_all("tauri://stt", &payload); }
